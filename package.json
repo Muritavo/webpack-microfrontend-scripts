@@ -9,9 +9,14 @@
     "react-start": "./bin/react/start.js"
   },
   "dependencies": {
+    "@types/jest": "^26.0.23",
     "@types/node": "^15.12.2",
     "typescript": "^4.3.2",
     "webpack": "^5.38.1",
     "webpack-dev-server": "^3.11.2"
+  },
+  "devDependencies": {
+    "jest": "^27.0.4",
+    "ts-jest": "^27.0.3"
   }
 }
