@@ -1,0 +1,17 @@
+{
+  "name": "@muritavo/webpack-build-scripts",
+  "version": "0.0.1",
+  "description": "A series of webpack build and watch script with microfrontends in mind",
+  "main": "index.js",
+  "author": "Murilo Oliveira de Araujo",
+  "license": "MIT",
+  "bin": {
+    "react-start": "./bin/react/start.js"
+  },
+  "dependencies": {
+    "@types/node": "^15.12.2",
+    "typescript": "^4.3.2",
+    "webpack": "^5.38.1",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
