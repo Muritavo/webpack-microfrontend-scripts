@@ -12,15 +12,34 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
             template: join(baseApplicaationDirectory, "public", "index.html")
         }))
     }
-    
+
     return Webpack({
         mode,
         context: baseApplicaationDirectory,
         output: {
             //Let's write to the build directory as react already does
             path: join(baseApplicaationDirectory, "build"),
-            libraryTarget: "system",
             filename: "index.js"
+        },
+        module: {
+            rules: [{
+                test: /\.m?[j|t]sx?$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: require.resolve('babel-loader'),
+                    options: {
+                        presets: [
+                            ['@babel/preset-env', { targets: "defaults" }],
+                            ['@babel/preset-react', {
+                                "runtime": "automatic"
+                            }]
+                        ]
+                    }
+                }
+            }]
+        },
+        resolve: {
+            extensions: ['.ts', '.tsx', '.js', '.json', '.wasm']
         },
         entry: {
             main: "./src/index.ts"

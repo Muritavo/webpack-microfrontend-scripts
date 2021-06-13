@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, rmdirSync, symlink, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { DirResult, dirSync, fileSync } from 'tmp';
 import { Stats } from 'webpack';
@@ -23,11 +23,48 @@ function writeEntryPoint() {
     );
 }
 
+function writeEntryPointWithJS() {
+    mkdirSync(join(testDirectory.name, "src"));
+    writeFileSync(
+        join(testDirectory.name, 'src', 'log.js'),
+        `export function log() {console.warn("I'm logging")}`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import { log } from "./log";
+
+log();
+`,
+    );
+}
+
 function writePublicHTML() {
     mkdirSync(join(testDirectory.name, "public"));
     writeFileSync(
         join(testDirectory.name, 'public', 'index.html'),
         "<html><head></head><body></body></html>",
+    );
+}
+
+function createNodeModulesFolder() {
+    symlinkSync(join(process.env.INIT_CWD!, "node_modules"), join(testDirectory.name, "node_modules"))
+}
+
+function writeEntryPointWithTSX() {
+    createNodeModulesFolder();
+    mkdirSync(join(testDirectory.name, "src"));
+    writeFileSync(
+        join(testDirectory.name, 'src', 'component.tsx'),
+        `export function Component() { return <h1>Some text</h1> }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import React from 'react';
+import ReactDOM from 'react-dom';
+import { Component } from "./component";
+
+ReactDOM.render(React.createElement(Component), document.body);
+`,
     );
 }
 
@@ -79,3 +116,13 @@ it("Should have an index.html if the compilation does have a public html configu
         }
     }));
 });
+
+it("Should be able to parse js files", (done) => {
+    writeEntryPointWithJS();
+    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+})
+
+it("Should be able to parse tsx files", (done) => {
+    writeEntryPointWithTSX();
+    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+})
