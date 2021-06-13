@@ -1,5 +1,6 @@
 import './global.css';
 import './global.scss';
+import { some } from './somejson.json';
 import styled from 'styled-components';
 
 const Title = styled.h1`
@@ -17,6 +18,8 @@ export default function App() {
         <div className="title">Some title that is styled</div>
 
         <p>Some other stuff</p>
+
+        <p className="title">Some prop from json: {some}</p>
       </div>
     </>
   );

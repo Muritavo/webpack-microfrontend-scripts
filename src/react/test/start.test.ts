@@ -117,58 +117,32 @@ function createCompilerErrorHandler(doneCb: jest.DoneCallback) {
     }
 }
 
-it('Should compile when the folder has a src/index.ts entrypoint', (done) => {
-    writeEntryPoint();
-    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
-});
+function writeEntryPointWithJSON() {
+    createNodeModulesFolder();
+    mkdirSync(join(testDirectory.name, "src"));
+    writeFileSync(
+        join(testDirectory.name, 'src', `somejson.json`),
+        `{
+            "some": "prop",
+            "another": "property"
+        }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'component.tsx'),
+        `import {some} from './somejson.json';
 
-it("Should not have a index.html if the compilation doesn't have a public html configured", (done) => {
-    writeEntryPoint();
-    createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
-        if (_error || r!.hasErrors()) {
-            createCompilerErrorHandler(done)(_error, r);
-        } else {
-            expect(existsSync(join(testDirectory.name, "build", "index.html"))).toBe(false)
-            done()
-        }
-    }));
-});
+export function Component() { return <h1>{some}</h1> }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import React from 'react';
+import ReactDOM from 'react-dom';
+import { Component } from "./component";
 
-it("Should have an index.html if the compilation does have a public html configured", (done) => {
-    writeEntryPoint();
-    writePublicHTML();
-    createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
-        if (_error || r!.hasErrors()) {
-            createCompilerErrorHandler(done)(_error, r);
-        } else {
-            expect(existsSync(join(testDirectory.name, "build", "index.html"))).toBe(true);
-            done();
-        }
-    }));
-});
-
-it("Should be able to parse js files", (done) => {
-    writeEntryPointWithJS();
-    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
-})
-
-it("Should be able to parse tsx files", (done) => {
-    writeEntryPointWithTSX();
-    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
-})
-
-it("The babel should be customizable from the application that is using this lib", (done) => {
-    writeEntryPointWithJS();
-    writeBabelRC();
-    createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
-        if (_error || r!.hasErrors()) {
-            createCompilerErrorHandler(done)(_error, r);
-        } else {
-            expect(require.cache[join(testDirectory.name, ".babelrc.js")]).toBeDefined();
-            done();
-        }
-    }));
-})
+ReactDOM.render(React.createElement(Component), document.body);
+`,
+    );
+}
 
 function writeEntryPointWithStyle(styleType: "scss" | "css") {
     createNodeModulesFolder();
@@ -198,46 +172,81 @@ ReactDOM.render(React.createElement(Component), document.body);
     );
 }
 
-it.each([["scss", undefined], ["css", undefined]] as const)("Should be able to parse %s files", (styleType) => {
-    writeEntryPointWithStyle(styleType);
-    const promise = createAsyncCb();
-    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(promise.callback));
-    return promise;
+describe("Basic functionality", () => {
+    it('Should compile when the folder has a src/index.ts entrypoint', (done) => {
+        writeEntryPoint();
+        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+    });
+    
+    it("Should not have a index.html if the compilation doesn't have a public html configured", (done) => {
+        writeEntryPoint();
+        createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+            if (_error || r!.hasErrors()) {
+                createCompilerErrorHandler(done)(_error, r);
+            } else {
+                expect(existsSync(join(testDirectory.name, "build", "index.html"))).toBe(false)
+                done()
+            }
+        }));
+    });
+    
+    it("Should have an index.html if the compilation does have a public html configured", (done) => {
+        writeEntryPoint();
+        writePublicHTML();
+        createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+            if (_error || r!.hasErrors()) {
+                createCompilerErrorHandler(done)(_error, r);
+            } else {
+                expect(existsSync(join(testDirectory.name, "build", "index.html"))).toBe(true);
+                done();
+            }
+        }));
+    });
+    
+    it("Should be able to parse js files", (done) => {
+        writeEntryPointWithJS();
+        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+    })
+    
+    it("Should be able to parse tsx files", (done) => {
+        writeEntryPointWithTSX();
+        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+    })
+    
+    it("The babel should be customizable from the application that is using this lib", (done) => {
+        writeEntryPointWithJS();
+        writeBabelRC();
+        createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+            if (_error || r!.hasErrors()) {
+                createCompilerErrorHandler(done)(_error, r);
+            } else {
+                expect(require.cache[join(testDirectory.name, ".babelrc.js")]).toBeDefined();
+                done();
+            }
+        }));
+    })
+    
+    it.each([["scss", undefined], ["css", undefined]] as const)("Should be able to parse %s files", (styleType) => {
+        writeEntryPointWithStyle(styleType);
+        const promise = createAsyncCb();
+        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(promise.callback));
+        return promise;
+    })
+    
+    it("Should be able to load json", (done) => {
+        writeEntryPointWithJSON();
+        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+    });
+    
+    /**
+     * When experimenting with the microfrontends arhitecture, using this react predefined loader, it doesn't load the main class, making some styles break
+     * Let's refactor this with help from the documentation
+     */
+    it.todo("Should be able to load all css files when using the mini-css-extract-plugin")
 })
-function writeEntryPointWithJSON() {
-    createNodeModulesFolder();
-    mkdirSync(join(testDirectory.name, "src"));
-    writeFileSync(
-        join(testDirectory.name, 'src', `somejson.json`),
-        `{
-            "some": "prop",
-            "another": "property"
-        }`
-    )
-    writeFileSync(
-        join(testDirectory.name, 'src', 'component.tsx'),
-        `import {some} from './somejson.json';
-
-export function Component() { return <h1>{some}</h1> }`
-    )
-    writeFileSync(
-        join(testDirectory.name, 'src', 'index.ts'),
-        `import React from 'react';
-import ReactDOM from 'react-dom';
-import { Component } from "./component";
-
-ReactDOM.render(React.createElement(Component), document.body);
-`,
-    );
-}
-
-it("Should be able to load json", (done) => {
-    writeEntryPointWithJSON();
-    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
-});
 
 /**
- * When experimenting with the microfrontends arhitecture, using this react predefined loader, it doesn't load the main class, making some styles break
- * Let's refactor this with help from the documentation
+ * Here we shall put tests for optimizations made on the webpack compilation (svgs bundle, tree shaking, etc...)
  */
-it.todo("Should be able to load all css files when using the mini-css-extract-plugin")
+describe("Optimizations", () => {
+})

@@ -1,5 +1,8 @@
 {
     "compilerOptions": {
-        "jsx": "react-jsx"
+        "moduleResolution": "Node",
+        "resolveJsonModule": true,
+        "jsx": "react-jsx",
+        "module": "ES6"
     }
 }
