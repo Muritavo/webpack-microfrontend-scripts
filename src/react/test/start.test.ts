@@ -24,6 +24,20 @@ afterAll(() => {
     rmdirSync(tmpPath);
 })
 
+function createAsyncCb(): Promise<any> & {
+    callback: jest.DoneCallback
+} {
+    let res: any, rej: any;
+    const promise = new Promise((_res, _rej) => { res = _res; rej = _rej });
+    (promise as any).callback = ((errorStr?: string) => {
+        if (errorStr)
+            rej(errorStr);
+        else
+            res();
+    }) as jest.DoneCallback;
+    return promise as any;
+}
+
 function writeEntryPoint() {
     mkdirSync(join(testDirectory.name, "src"));
     writeFileSync(
@@ -156,18 +170,20 @@ it("The babel should be customizable from the application that is using this lib
     }));
 })
 
-function writeEntryPointWithCSS() {
+function writeEntryPointWithStyle(styleType: "scss" | "css") {
     createNodeModulesFolder();
     mkdirSync(join(testDirectory.name, "src"));
     writeFileSync(
-        join(testDirectory.name, 'src', 'styles.css'),
-        `div {
-            background-color: blue;
+        join(testDirectory.name, 'src', `styles.${styleType}`),
+        `
+        ${styleType === "css" ? "" : "$someVar: blue;"}
+        div {
+            background-color: ${styleType === "css" ? "blue" : "$someVar"};
         }`
     )
     writeFileSync(
         join(testDirectory.name, 'src', 'component.tsx'),
-        `import './styles.css';
+        `import './styles.${styleType}';
 
 export function Component() { return <h1>Some text</h1> }`
     )
@@ -182,10 +198,43 @@ ReactDOM.render(React.createElement(Component), document.body);
     );
 }
 
-it("Should be able to parse css files", (done) => {
-    writeEntryPointWithCSS();
-    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+it.each([["scss", undefined], ["css", undefined]] as const)("Should be able to parse %s files", (styleType) => {
+    writeEntryPointWithStyle(styleType);
+    const promise = createAsyncCb();
+    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(promise.callback));
+    return promise;
 })
+function writeEntryPointWithJSON() {
+    createNodeModulesFolder();
+    mkdirSync(join(testDirectory.name, "src"));
+    writeFileSync(
+        join(testDirectory.name, 'src', `somejson.json`),
+        `{
+            "some": "prop",
+            "another": "property"
+        }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'component.tsx'),
+        `import {some} from './somejson.json';
+
+export function Component() { return <h1>{some}</h1> }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import React from 'react';
+import ReactDOM from 'react-dom';
+import { Component } from "./component";
+
+ReactDOM.render(React.createElement(Component), document.body);
+`,
+    );
+}
+
+it("Should be able to load json", (done) => {
+    writeEntryPointWithJSON();
+    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+});
 
 /**
  * When experimenting with the microfrontends arhitecture, using this react predefined loader, it doesn't load the main class, making some styles break
