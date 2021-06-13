@@ -28,6 +28,8 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
                 use: {
                     loader: require.resolve('babel-loader'),
                     options: {
+                        // Allow customization from babelrc from the application folder
+                        babelrcRoots: [baseApplicaationDirectory],
                         presets: [
                             ['@babel/preset-env', { targets: "defaults" }],
                             ['@babel/preset-react', {

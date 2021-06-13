@@ -1,12 +1,17 @@
 import { existsSync, mkdirSync, rmdirSync, symlink, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { DirResult, dirSync, fileSync } from 'tmp';
+import { DirResult, dirSync } from 'tmp';
 import { Stats } from 'webpack';
 import { createWebpackConfiguration } from '../scripts/_webpackConfiguration';
 
 let testDirectory: DirResult;
+const tmpPath = join(__dirname, "tmp");
 beforeEach(() => {
-    testDirectory = dirSync();
+    if (!existsSync(tmpPath))
+        mkdirSync(tmpPath)
+    testDirectory = dirSync({
+        tmpdir: tmpPath
+    });
 });
 
 afterEach(() => {
@@ -14,6 +19,10 @@ afterEach(() => {
         recursive: true
     })
 });
+
+afterAll(() => {
+    rmdirSync(tmpPath);
+})
 
 function writeEntryPoint() {
     mkdirSync(join(testDirectory.name, "src"));
@@ -68,6 +77,13 @@ ReactDOM.render(React.createElement(Component), document.body);
     );
 }
 
+function writeBabelRC() {
+    writeFileSync(
+        join(testDirectory.name, '.babelrc.js'),
+        `module.exports = { plugins: ["babel-plugin-styled-components"] }`
+    )
+}
+
 function asyncWrapper<T extends any[]>(doneCb: jest.DoneCallback, fn: (...args: T) => void) {
     return (...args: T) => {
         try {
@@ -82,7 +98,7 @@ function createCompilerErrorHandler(doneCb: jest.DoneCallback) {
     return (_error?: Error, r?: Stats) => {
         if (_error) doneCb(_error);
         if (r && r.hasErrors())
-            doneCb(r.compilation.errors.map((e) => typeof e ==="string" ? e : e.message).join('\n'));
+            doneCb(r.compilation.errors.map((e) => typeof e === "string" ? e : e.message).join('\n'));
         else doneCb();
     }
 }
@@ -125,4 +141,17 @@ it("Should be able to parse js files", (done) => {
 it("Should be able to parse tsx files", (done) => {
     writeEntryPointWithTSX();
     createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+})
+
+it("The babel should be customizable from the application that is using this lib", (done) => {
+    writeEntryPointWithJS();
+    writeBabelRC();
+    createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+        if (_error || r!.hasErrors()) {
+            createCompilerErrorHandler(done)(_error, r);
+        } else {
+            expect(require.cache[join(testDirectory.name, ".babelrc.js")]).toBeDefined();
+            done();
+        }
+    }));
 })
