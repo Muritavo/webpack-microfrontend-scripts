@@ -155,3 +155,40 @@ it("The babel should be customizable from the application that is using this lib
         }
     }));
 })
+
+function writeEntryPointWithCSS() {
+    createNodeModulesFolder();
+    mkdirSync(join(testDirectory.name, "src"));
+    writeFileSync(
+        join(testDirectory.name, 'src', 'styles.css'),
+        `div {
+            background-color: blue;
+        }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'component.tsx'),
+        `import './styles.css';
+
+export function Component() { return <h1>Some text</h1> }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import React from 'react';
+import ReactDOM from 'react-dom';
+import { Component } from "./component";
+
+ReactDOM.render(React.createElement(Component), document.body);
+`,
+    );
+}
+
+it("Should be able to parse css files", (done) => {
+    writeEntryPointWithCSS();
+    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+})
+
+/**
+ * When experimenting with the microfrontends arhitecture, using this react predefined loader, it doesn't load the main class, making some styles break
+ * Let's refactor this with help from the documentation
+ */
+it.todo("Should be able to load all css files when using the mini-css-extract-plugin")

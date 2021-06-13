@@ -38,6 +38,9 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
                         ]
                     }
                 }
+            }, {
+                test: /\.css$/i,
+                use: ["style-loader", "css-loader"],
             }]
         },
         resolve: {
