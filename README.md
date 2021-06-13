@@ -5,6 +5,7 @@ This project aims to create and build scripts that are focused on compiling micr
 The project has the following directory patterns
 
 - src: Where all the development sources are coded in
+    - shared: Modules shared accross multiple framework setups
     - {framework}: Each script is focused on being used bound to a framework
         - scripts: The scripts to be provided by this application (mainly start & build)
         - test: An aplication to test each provided script (mainly start & build)

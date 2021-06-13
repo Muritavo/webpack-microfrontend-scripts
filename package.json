@@ -8,14 +8,21 @@
   "bin": {
     "react-start": "./bin/react/start.js"
   },
+  "scripts": {
+    "test": "tsc && jest",
+    "prestart:react": "tsc",
+    "start:react": "node bin/react/scripts/start.js --root=./src/react/test/application"
+  },
   "dependencies": {
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.2",
+    "html-webpack-plugin": "^5.3.1",
     "typescript": "^4.3.2",
     "webpack": "^5.38.1",
     "webpack-dev-server": "^3.11.2"
   },
   "devDependencies": {
+    "@types/webpack-dev-server": "^3.11.4",
     "jest": "^27.0.4",
     "ts-jest": "^27.0.3"
   }
