@@ -1,5 +1,81 @@
-import { execSync } from "child_process";
+import { existsSync, mkdirSync, rmdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { DirResult, dirSync, fileSync } from 'tmp';
+import { Stats } from 'webpack';
+import { createWebpackConfiguration } from '../scripts/_webpackConfiguration';
 
-it("Should compile application", () => {
-    execSync("node ./bin/react/scripts/start");
-})
+let testDirectory: DirResult;
+beforeEach(() => {
+    testDirectory = dirSync();
+});
+
+afterEach(() => {
+    rmdirSync(testDirectory.name, {
+        recursive: true
+    })
+});
+
+function writeEntryPoint() {
+    mkdirSync(join(testDirectory.name, "src"));
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        "console.warn('works')",
+    );
+}
+
+function writePublicHTML() {
+    mkdirSync(join(testDirectory.name, "public"));
+    writeFileSync(
+        join(testDirectory.name, 'public', 'index.html'),
+        "<html><head></head><body></body></html>",
+    );
+}
+
+function asyncWrapper<T extends any[]>(doneCb: jest.DoneCallback, fn: (...args: T) => void) {
+    return (...args: T) => {
+        try {
+            fn(...args);
+        } catch (e) {
+            doneCb(e);
+        }
+    }
+}
+
+function createCompilerErrorHandler(doneCb: jest.DoneCallback) {
+    return (_error?: Error, r?: Stats) => {
+        if (_error) doneCb(_error);
+        if (r && r.hasErrors())
+            doneCb(r.compilation.errors.map((e) => typeof e ==="string" ? e : e.message).join('\n'));
+        else doneCb();
+    }
+}
+
+it('Should compile when the folder has a src/index.ts entrypoint', (done) => {
+    writeEntryPoint();
+    createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+});
+
+it("Should not have a index.html if the compilation doesn't have a public html configured", (done) => {
+    writeEntryPoint();
+    createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+        if (_error || r!.hasErrors()) {
+            createCompilerErrorHandler(done)(_error, r);
+        } else {
+            expect(existsSync(join(testDirectory.name, "build", "index.html"))).toBe(false)
+            done()
+        }
+    }));
+});
+
+it("Should have an index.html if the compilation does have a public html configured", (done) => {
+    writeEntryPoint();
+    writePublicHTML();
+    createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+        if (_error || r!.hasErrors()) {
+            createCompilerErrorHandler(done)(_error, r);
+        } else {
+            expect(existsSync(join(testDirectory.name, "build", "index.html"))).toBe(true);
+            done();
+        }
+    }));
+});

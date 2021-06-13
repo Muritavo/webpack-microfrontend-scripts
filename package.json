@@ -9,7 +9,7 @@
     "react-start": "./bin/react/start.js"
   },
   "scripts": {
-    "test": "tsc && jest",
+    "test": "jest",
     "prestart:react": "tsc",
     "start:react": "node bin/react/scripts/start.js --root=./src/react/test/application"
   },
@@ -22,8 +22,10 @@
     "webpack-dev-server": "^3.11.2"
   },
   "devDependencies": {
+    "@types/tmp": "^0.2.0",
     "@types/webpack-dev-server": "^3.11.4",
     "jest": "^27.0.4",
+    "tmp": "^0.2.1",
     "ts-jest": "^27.0.3"
   }
 }
