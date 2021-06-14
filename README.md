@@ -1,6 +1,19 @@
 # What is this project
 This project aims to create and build scripts that are focused on compiling microfrontend applications.
 
+# How to use it
+- Install this cli application inside your project using
+```bash
+# With npm
+npm i @muritavo/webpack-microfrontend-scripts
+
+# or with yarn
+yarn add @muritavo/webpack-microfrontend-scripts
+```
+- Inside the application you want to build:
+    - Make sure the application has a src/index.ts (it is now hardcoded and a better detection system is on the roadmap)
+    - Run the command ``yarn react-build`` or ``yarn react-start`` to build or watch the application respectively
+
 # How it is structured
 The project has the following directory patterns
 
@@ -25,6 +38,7 @@ The project has the following directory patterns
 - [x] Support Hot swap
 - [x] Support SVGs, PNGs, and other files as simple sources
 - [] Allow webpack manipulation from the base folder of the application
+- [] Allow any index.EXT file to be used as entrypoint
 - [ ] **Support Module federation**
 
 ## Optimizations
