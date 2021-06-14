@@ -20,8 +20,8 @@ The project has the following directory patterns
 - [x] Support CSS
 - [x] Support SCSS
 - [x] Support JSON
-- [ ] Support SCSS Modules
-- [ ] Support CSS Modules
+- [x] Support SCSS Modules
+- [x] Support CSS Modules
 - [ ] Support Hot swap
 - [ ] **Support Module federation**
 

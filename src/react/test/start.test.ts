@@ -144,15 +144,15 @@ ReactDOM.render(React.createElement(Component), document.body);
     );
 }
 
-function writeEntryPointWithStyle(styleType: "scss" | "css") {
+function writeEntryPointWithStyle(styleType: "scss" | "css" | "module.css" | "module.scss") {
     createNodeModulesFolder();
     mkdirSync(join(testDirectory.name, "src"));
     writeFileSync(
         join(testDirectory.name, 'src', `styles.${styleType}`),
         `
-        ${styleType === "css" ? "" : "$someVar: blue;"}
+        ${styleType === "css" || styleType === "module.css" ? "" : "$someVar: blue;"}
         div {
-            background-color: ${styleType === "css" ? "blue" : "$someVar"};
+            background-color: ${styleType === "css" || styleType === "module.css" ? "blue" : "$someVar"};
         }`
     )
     writeFileSync(
@@ -226,7 +226,7 @@ describe("Basic functionality", () => {
         }));
     })
     
-    it.each([["scss", undefined], ["css", undefined]] as const)("Should be able to parse %s files", (styleType) => {
+    it.each([["scss"], ["css"], ["module.css"], ["module.scss"]] as const)("Should be able to parse %s files", (styleType) => {
         writeEntryPointWithStyle(styleType);
         const promise = createAsyncCb();
         createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(promise.callback));

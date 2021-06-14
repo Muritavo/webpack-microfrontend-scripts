@@ -1,0 +1,30 @@
+@mixin jumpyStuff() {
+    animation-name: jumpy;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    transform-origin: 24px 24px;
+    animation-delay: #{random(1000)}ms;
+}
+
+@keyframes jumpy {
+    0% {
+        transform: scaleY(100%) translateY(0%);
+    }
+    25% {
+        transform: scaleY(50%) translateY(0%);
+    }
+
+    50% {
+        transform: scaleY(100%) translateY(-100%);
+    }
+    75% {
+        transform: scaleY(100%) translateY(0%);
+    }
+    90% {
+        transform: scaleY(50%) translateY(0%);
+    }
+    100% {
+        transform: scaleY(100%) translateY(0%);
+    }
+}

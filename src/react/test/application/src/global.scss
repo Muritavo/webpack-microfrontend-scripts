@@ -1,5 +1,8 @@
+@import './shared.scss';
+
 .title {
     font-weight: bold;
     background: linear-gradient(red, blue, red);
     color: white;
+    @include jumpyStuff;
 }

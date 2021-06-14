@@ -1,0 +1,9 @@
+@import "./shared.scss";
+
+.somestuff {
+    background: green;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    @include jumpyStuff;
+}

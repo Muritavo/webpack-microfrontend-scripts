@@ -2,6 +2,7 @@ import './global.css';
 import './global.scss';
 import { some } from './somejson.json';
 import styled from 'styled-components';
+import SomeStyles from "./App.module.scss";
 
 const Title = styled.h1`
   font-size: 1.5em;
@@ -17,7 +18,7 @@ export default function App() {
       <div className="document">
         <div className="title">Some title that is styled</div>
 
-        <p>Some other stuff</p>
+        <p className={SomeStyles.somestuff}>Some other stuff</p>
 
         <p className="title">Some prop from json: {some}</p>
       </div>
