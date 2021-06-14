@@ -3,6 +3,8 @@ import './global.scss';
 import { some } from './somejson.json';
 import styled from 'styled-components';
 import SomeStyles from "./App.module.scss";
+import { useMemo } from 'react';
+import AnotherComponent from './AnotherComponent';
 
 const Title = styled.h1`
   font-size: 1.5em;
@@ -11,8 +13,10 @@ const Title = styled.h1`
 `;
 
 export default function App() {
+  const oneTimeOnly = useMemo(() => new Date().toISOString(), []);
   return (
     <>
+      <h1>Initialization time: {oneTimeOnly}</h1>
       <Title>Some title</Title>
       <h1>A simple application</h1>
       <div className="document">
@@ -22,6 +26,7 @@ export default function App() {
 
         <p className="title">Some prop from json: {some}</p>
       </div>
+      <AnotherComponent/>
     </>
   );
 }

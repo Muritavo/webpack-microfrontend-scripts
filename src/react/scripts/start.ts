@@ -11,7 +11,9 @@ const mode = "development";
 const devServer = new DevServer(
     createWebpackConfiguration(root, mode),
     {
-        contentBase: join(root, "public")
+        contentBase: join(root, "public"),
+        hot: true,
+        hotOnly: true,
     }
 );
 devServer.listen(19999);

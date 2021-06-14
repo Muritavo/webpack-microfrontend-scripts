@@ -1,8 +1,16 @@
 @import "./shared.scss";
 
 .somestuff {
-    background: green;
+    background: lightsalmon;
     font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    @include jumpyStuff;
+}
+
+.anotherStuf {
+    color: red;
+    font-size: 48px;
     font-weight: bold;
     font-style: italic;
     @include jumpyStuff;

@@ -2,6 +2,7 @@ import Webpack, { Configuration } from 'webpack';
 import HTMLPlugin from "html-webpack-plugin";
 import { join } from 'path';
 import { existsSync } from 'fs';
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 export function createWebpackConfiguration(baseApplicaationDirectory: string, mode: Configuration['mode']) {
     const plugins: Configuration['plugins'] = [];
@@ -11,6 +12,10 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
         plugins.push(new HTMLPlugin({
             template: join(baseApplicaationDirectory, "public", "index.html")
         }))
+    }
+
+    if (mode === "development") {
+        plugins.push(new ReactRefreshWebpackPlugin())
     }
 
     return Webpack({
@@ -35,7 +40,10 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
                             ['@babel/preset-react', {
                                 "runtime": "automatic"
                             }]
-                        ]
+                        ],
+                        plugins: [
+                            mode === "development" && require.resolve('react-refresh/babel')
+                        ].filter(Boolean)
                     }
                 }
             }, {
@@ -44,14 +52,14 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
             }, {
                 test: /\.s[ac]ss$/i,
                 use: [
-                  // Creates `style` nodes from JS strings
-                  "style-loader",
-                  // Translates CSS into CommonJS
-                  "css-loader",
-                  // Compiles Sass to CSS
-                  "sass-loader",
+                    // Creates `style` nodes from JS strings
+                    "style-loader",
+                    // Translates CSS into CommonJS
+                    "css-loader",
+                    // Compiles Sass to CSS
+                    "sass-loader",
                 ],
-              }]
+            }]
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.json', '.wasm']

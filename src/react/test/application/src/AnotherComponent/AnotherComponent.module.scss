@@ -1,0 +1,19 @@
+.someClass {
+    color: yellow;
+    background: black;
+    font-size: 48px;
+    box-shadow: 0px 0px 16px red;
+}
+
+.anotherClass {
+    display: block;
+    background: blue;
+    box-shadow: 0px 0px 8px lightblue;
+    color: yellowgreen;
+    padding: 48px;
+    transition: transform 1000ms;
+}
+
+.anotherClass:hover {
+    transform: scale(150%);
+}
