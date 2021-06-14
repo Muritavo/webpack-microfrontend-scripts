@@ -98,6 +98,30 @@ function writeBabelRC() {
     )
 }
 
+function writeEntryWithSVG() {
+    createNodeModulesFolder();
+    mkdirSync(join(testDirectory.name, "src"));
+    writeFileSync(
+        join(testDirectory.name, 'src', 'some-icon.svg'),
+        `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'component.tsx'),
+        `import svgIconPath from './some-icon.svg';
+        
+        export function Component() { return <img src={svgIconPath}/> }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import React from 'react';
+import ReactDOM from 'react-dom';
+import { Component } from "./component";
+
+ReactDOM.render(React.createElement(Component), document.body);
+`,
+    );
+}
+
 function asyncWrapper<T extends any[]>(doneCb: jest.DoneCallback, fn: (...args: T) => void) {
     return (...args: T) => {
         try {
@@ -175,12 +199,12 @@ ReactDOM.render(React.createElement(Component), document.body);
 describe("Basic functionality", () => {
     it('Should compile when the folder has a src/index.ts entrypoint', (done) => {
         writeEntryPoint();
-        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     });
     
     it("Should not have a index.html if the compilation doesn't have a public html configured", (done) => {
         writeEntryPoint();
-        createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+        createWebpackConfiguration(testDirectory.name, 'production').run(asyncWrapper(done, (_error, r) => {
             if (_error || r!.hasErrors()) {
                 createCompilerErrorHandler(done)(_error, r);
             } else {
@@ -193,7 +217,7 @@ describe("Basic functionality", () => {
     it("Should have an index.html if the compilation does have a public html configured", (done) => {
         writeEntryPoint();
         writePublicHTML();
-        createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+        createWebpackConfiguration(testDirectory.name, 'production').run(asyncWrapper(done, (_error, r) => {
             if (_error || r!.hasErrors()) {
                 createCompilerErrorHandler(done)(_error, r);
             } else {
@@ -205,18 +229,18 @@ describe("Basic functionality", () => {
     
     it("Should be able to parse js files", (done) => {
         writeEntryPointWithJS();
-        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     })
     
     it("Should be able to parse tsx files", (done) => {
         writeEntryPointWithTSX();
-        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     })
     
     it("The babel should be customizable from the application that is using this lib", (done) => {
         writeEntryPointWithJS();
         writeBabelRC();
-        createWebpackConfiguration(testDirectory.name, 'development').run(asyncWrapper(done, (_error, r) => {
+        createWebpackConfiguration(testDirectory.name, 'production').run(asyncWrapper(done, (_error, r) => {
             if (_error || r!.hasErrors()) {
                 createCompilerErrorHandler(done)(_error, r);
             } else {
@@ -229,13 +253,18 @@ describe("Basic functionality", () => {
     it.each([["scss"], ["css"], ["module.css"], ["module.scss"]] as const)("Should be able to parse %s files", (styleType) => {
         writeEntryPointWithStyle(styleType);
         const promise = createAsyncCb();
-        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(promise.callback));
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(promise.callback));
         return promise;
     })
     
     it("Should be able to load json", (done) => {
         writeEntryPointWithJSON();
-        createWebpackConfiguration(testDirectory.name, 'development').run(createCompilerErrorHandler(done));
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
+    });
+    
+    it("Should be able to other type of files as simple url", (done) => {
+        writeEntryWithSVG();
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     });
     
     /**

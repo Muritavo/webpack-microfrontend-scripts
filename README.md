@@ -23,6 +23,7 @@ The project has the following directory patterns
 - [x] Support SCSS Modules
 - [x] Support CSS Modules
 - [x] Support Hot swap
+- [] Support SVGs, PNGs, and other files as simple sources
 - [ ] **Support Module federation**
 
 ## Optimizations

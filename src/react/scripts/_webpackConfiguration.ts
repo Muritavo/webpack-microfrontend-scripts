@@ -59,7 +59,13 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
                     // Compiles Sass to CSS
                     "sass-loader",
                 ],
-            }]
+            }, {
+                test: /\.(png|jpe?g|gif|pdf|svg)$/i,
+                loader: 'file-loader',
+                options: {
+                  name: '[path][name].[ext]',
+                },
+              }]
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js', '.json', '.wasm']
