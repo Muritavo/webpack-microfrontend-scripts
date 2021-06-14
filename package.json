@@ -5,6 +5,7 @@
   "main": "index.js",
   "author": "Murilo Oliveira de Araujo",
   "license": "MIT",
+  "private": false,
   "bin": {
     "react-start": "./bin/react/start.js",
     "react-build": "./bin/react/build.js"
