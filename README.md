@@ -1,3 +1,5 @@
+![npm](https://img.shields.io/npm/v/@muritavo/webpack-microfrontend-scripts)
+
 # What is this project
 This project aims to create and build scripts that are focused on compiling microfrontend applications.
 
