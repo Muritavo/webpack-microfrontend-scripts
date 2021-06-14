@@ -266,12 +266,21 @@ describe("Basic functionality", () => {
         writeEntryWithSVG();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     });
-    
+
     /**
      * When experimenting with the microfrontends arhitecture, using this react predefined loader, it doesn't load the main class, making some styles break
      * Let's refactor this with help from the documentation
      */
     it.todo("Should be able to load all css files when using the mini-css-extract-plugin")
+})
+
+describe("Bug fixing", () => {
+    it.todo("Fix a problem where requiring an asset relative to another scss file imported from a different folder would request relative to the different folder");
+    it.todo("Allowing compilation of typescript files, babel would crash with some syntaxes");
+    it.todo("Defining a class with properties would fail the compilation");
+    it.todo("Requiring ttf would crash the compilation");
+    it.todo("Requiring an index.jsx from a folder would not be found");
+
 })
 
 /**

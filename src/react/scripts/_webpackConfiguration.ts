@@ -39,10 +39,12 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
                             ['@babel/preset-env', { targets: "defaults" }],
                             ['@babel/preset-react', {
                                 "runtime": "automatic"
-                            }]
+                            }],
+                            ['@babel/preset-typescript']
                         ],
                         plugins: [
-                            mode === "development" && require.resolve('react-refresh/babel')
+                            mode === "development" && require.resolve('react-refresh/babel'),
+                            "@babel/plugin-proposal-class-properties"
                         ].filter(Boolean)
                     }
                 }
@@ -56,11 +58,19 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
                     "style-loader",
                     // Translates CSS into CommonJS
                     "css-loader",
+                    // Fixes imports relative to the sass file location
+                    "resolve-url-loader",
                     // Compiles Sass to CSS
-                    "sass-loader",
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            sourceMap: true,
+                            sourceMapContents: false
+                          }                      
+                    },
                 ],
             }, {
-                test: /\.(png|jpe?g|gif|pdf|svg)$/i,
+                test: /\.(png|jpe?g|gif|pdf|svg|ttf)$/i,
                 loader: 'file-loader',
                 options: {
                   name: '[path][name].[ext]',
@@ -68,7 +78,7 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
               }]
         },
         resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.json', '.wasm']
+            extensions: ['.ts', '.tsx', '.js', '.json', '.wasm', '.jsx']
         },
         entry: {
             main: "./src/index.ts"
