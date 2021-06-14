@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import { join, resolve } from 'path';
 import { getArgument } from '../../shared/arguments';
 import { createWebpackConfiguration } from './_webpackConfiguration';

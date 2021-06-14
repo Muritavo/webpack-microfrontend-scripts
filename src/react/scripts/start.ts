@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import DevServer from 'webpack-dev-server';
 import { join, resolve } from 'path';
 import { getArgument } from '../../shared/arguments';
