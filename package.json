@@ -14,7 +14,8 @@
     "prestart:react": "tsc",
     "start:react": "node bin/react/scripts/start.js --root=./src/react/test/application",
     "prebuild:react": "tsc",
-    "build:react": "node bin/react/scripts/build.js --root=./src/react/test/application"
+    "build:react": "node bin/react/scripts/build.js --root=./src/react/test/application",
+    "prepublish": "tsc"
   },
   "dependencies": {
     "@babel/core": "^7.14.5",
