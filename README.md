@@ -37,10 +37,11 @@ The project has the following directory patterns
 - [x] Support CSS Modules
 - [x] Support Hot swap
 - [x] Support SVGs, PNGs, and other files as simple sources
-- [] Allow webpack manipulation from the base folder of the application
-- [] Allow any index.EXT file to be used as entrypoint
+- [ ] Allow webpack manipulation from the base folder of the application
+- [ ] Allow any index.EXT file to be used as entrypoint
 - [ ] **Support Module federation**
 
 ## Optimizations
+- [ ] Separate the CSS from JS source (replace the style-loader by the mini-css-extract-plugin)
 - [ ] Support JSON treeshaking
 - [ ] Support SVG bundling / Reduce amount of small SVG files
