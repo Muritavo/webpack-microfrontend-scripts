@@ -6,12 +6,15 @@
   "author": "Murilo Oliveira de Araujo",
   "license": "MIT",
   "bin": {
-    "react-start": "./bin/react/start.js"
+    "react-start": "./bin/react/start.js",
+    "react-build": "./bin/react/build.js"
   },
   "scripts": {
     "test": "jest",
     "prestart:react": "tsc",
-    "start:react": "node bin/react/scripts/start.js --root=./src/react/test/application"
+    "start:react": "node bin/react/scripts/start.js --root=./src/react/test/application",
+    "prebuild:react": "tsc",
+    "build:react": "node bin/react/scripts/build.js --root=./src/react/test/application"
   },
   "dependencies": {
     "@babel/core": "^7.14.5",

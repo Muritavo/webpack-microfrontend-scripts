@@ -23,7 +23,8 @@ The project has the following directory patterns
 - [x] Support SCSS Modules
 - [x] Support CSS Modules
 - [x] Support Hot swap
-- [] Support SVGs, PNGs, and other files as simple sources
+- [x] Support SVGs, PNGs, and other files as simple sources
+- [] Allow webpack manipulation from the base folder of the application
 - [ ] **Support Module federation**
 
 ## Optimizations
