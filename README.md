@@ -22,7 +22,7 @@ The project has the following directory patterns
 - [x] Support JSON
 - [x] Support SCSS Modules
 - [x] Support CSS Modules
-- [ ] Support Hot swap
+- [x] Support Hot swap
 - [ ] **Support Module federation**
 
 ## Optimizations
