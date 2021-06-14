@@ -1,4 +1,4 @@
-[![npm][npm]][npm-url]
+![npm](https://img.shields.io/npm/v/@muritavo/webpack-microfrontend-scripts)
 
 # What is this project
 This project aims to create and build scripts that are focused on compiling microfrontend applications.
@@ -47,5 +47,3 @@ The project has the following directory patterns
 - [ ] Separate the CSS from JS source (replace the style-loader by the mini-css-extract-plugin)
 - [ ] Support JSON treeshaking
 - [ ] Support SVG bundling / Reduce amount of small SVG files
-
-[npm-url]: https://www.npmjs.com/package/@muritavo/webpack-microfrontend-scripts
