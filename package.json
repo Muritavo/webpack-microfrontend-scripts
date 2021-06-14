@@ -1,5 +1,5 @@
 {
-  "name": "@muritavo/webpack-build-scripts",
+  "name": "@muritavo/webpack-microfrontend-scripts",
   "version": "0.0.1",
   "description": "A series of webpack build and watch script with microfrontends in mind",
   "main": "index.js",
