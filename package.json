@@ -9,6 +9,9 @@
     "react-start": "./bin/react/start.js",
     "react-build": "./bin/react/build.js"
   },
+  "files": [
+    "bin"
+  ],
   "scripts": {
     "test": "jest",
     "prestart:react": "tsc",
