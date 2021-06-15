@@ -1,6 +1,6 @@
 import './global.css';
 import './global.scss';
-import { some } from './somejson.json';
+import JSONObject from './somejson.json';
 import styled from 'styled-components';
 import SomeStyles from "./App.module.scss";
 import { useMemo } from 'react';
@@ -24,7 +24,7 @@ export default function App() {
 
         <p className={SomeStyles.somestuff}>Some other stuff</p>
 
-        <p className="title">Some prop from json: {some}</p>
+        <p className="title">Some prop from json: {JSONObject.some}</p>
       </div>
       <AnotherComponent/>
     </>

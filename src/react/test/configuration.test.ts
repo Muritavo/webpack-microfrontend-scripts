@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmdirSync, symlink, symlinkSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, rmdirSync, symlink, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { DirResult, dirSync } from 'tmp';
 import { Stats } from 'webpack';
@@ -316,6 +316,18 @@ describe("Basic functionality", () => {
     it("Should be able to other type of files as simple url", (done) => {
         writeEntryWithSVG();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
+    });
+
+    it("Should embeed the systemjs chunk and the main chunk", (done) => {
+        writeEntryPoint();
+        writePublicHTML();
+        createWebpackConfiguration(testDirectory.name, 'production').run(asyncWrapper(done, () => {
+            //Should contain the chunk that contains the systemjs registration
+            expect(readFileSync(join(testDirectory.name, "build", "index.html")).toString()).toContain('system.chunk.js')
+            //Should contain the index.js chunk that contains the base application
+            expect(readFileSync(join(testDirectory.name, "build", "index.html")).toString()).toContain('index.js')
+            done();
+        }));
     });
 
     /**

@@ -24,7 +24,10 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
         output: {
             //Let's write to the build directory as react already does
             path: join(baseApplicaationDirectory, "build"),
-            filename: "index.js"
+            filename: (path) => {
+                return path.chunk?.name === "main" ? "index.js" : "[name].chunk.js"
+            },
+            publicPath: "/"
         },
         module: {
             rules: [{
@@ -80,7 +83,8 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
             extensions: ['.ts', '.tsx', '.js', '.json', '.wasm', '.jsx']
         },
         entry: {
-            main: "./src/index.ts"
+            main: "./src/index.ts",
+            system: require.resolve("systemjs/dist/system.min.js"),
         },
         plugins
     })
