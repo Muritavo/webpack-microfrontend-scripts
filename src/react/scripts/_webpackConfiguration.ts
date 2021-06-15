@@ -64,9 +64,8 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
                     {
                         loader: "sass-loader",
                         options: {
-                            sourceMap: true,
-                            sourceMapContents: false
-                          }                      
+                            sourceMap: true
+                        }                      
                     },
                 ],
             }, {

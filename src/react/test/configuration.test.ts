@@ -78,13 +78,17 @@ function writeEntryPointWithTSX() {
     mkdirSync(join(testDirectory.name, "src"));
     writeFileSync(
         join(testDirectory.name, 'src', 'component.tsx'),
-        `export function Component() { return <h1>Some text</h1> }`
+        `export function Component(props: {some: "prop", array: string[]}) { return <h1>Some text</h1> }`
     )
     writeFileSync(
         join(testDirectory.name, 'src', 'index.ts'),
         `import React from 'react';
 import ReactDOM from 'react-dom';
 import { Component } from "./component";
+
+class SomeClass {
+    static someProperty: string = "something";
+}
 
 ReactDOM.render(React.createElement(Component), document.body);
 `,
@@ -96,6 +100,23 @@ function writeBabelRC() {
         join(testDirectory.name, '.babelrc.js'),
         `module.exports = { plugins: ["babel-plugin-styled-components"] }`
     )
+}
+
+function writeEntryPointWithJSX() {
+    mkdirSync(join(testDirectory.name, "src"));
+    mkdirSync(join(testDirectory.name, "src", "ComponentJSX"));
+    writeFileSync(
+        join(testDirectory.name, 'src', "ComponentJSX", 'index.jsx'),
+        `export default function ComponentJSX() {return null;}`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import C from "./ComponentJSX";
+import React from 'react';
+
+React.createElement(C);
+`,
+    );
 }
 
 function writeEntryWithSVG() {
@@ -196,12 +217,42 @@ ReactDOM.render(React.createElement(Component), document.body);
     );
 }
 
+function writeEntryWithSCSSWithRelativePath() {
+    mkdirSync(join(testDirectory.name, "src"));
+    mkdirSync(join(testDirectory.name, "src", "subfolder"));
+    writeFileSync(join(testDirectory.name, "src", "subfolder", "someAsset.svg"), `<svg/>`);
+    writeFileSync(join(testDirectory.name, "src", "subfolder", "someFont.ttf"), ``);
+    writeFileSync(join(testDirectory.name, "src", "subfolder", "someStyle.scss"), `@font-face {
+    src: url("./someFont.ttf");
+}
+p { 
+    background-image: url('./someAsset.svg'); 
+}`);
+    writeFileSync(join(testDirectory.name, "src", "anotherStyle.scss"), `@import './subfolder/someStyle.scss'`);
+    writeFileSync(
+        join(testDirectory.name, 'src', 'component.tsx'),
+        `import './anotherStyle.scss';
+import ttfPath from './subfolder/someFont.ttf';
+
+export function Component() { return <h1>{ttfPath}</h1> }`
+    )
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import React from 'react';
+import ReactDOM from 'react-dom';
+import { Component } from "./component";
+
+ReactDOM.render(React.createElement(Component), document.body);
+`,
+    );
+}
+
 describe("Basic functionality", () => {
     it('Should compile when the folder has a src/index.ts entrypoint', (done) => {
         writeEntryPoint();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     });
-    
+
     it("Should not have a index.html if the compilation doesn't have a public html configured", (done) => {
         writeEntryPoint();
         createWebpackConfiguration(testDirectory.name, 'production').run(asyncWrapper(done, (_error, r) => {
@@ -213,7 +264,7 @@ describe("Basic functionality", () => {
             }
         }));
     });
-    
+
     it("Should have an index.html if the compilation does have a public html configured", (done) => {
         writeEntryPoint();
         writePublicHTML();
@@ -226,17 +277,17 @@ describe("Basic functionality", () => {
             }
         }));
     });
-    
+
     it("Should be able to parse js files", (done) => {
         writeEntryPointWithJS();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     })
-    
+
     it("Should be able to parse tsx files", (done) => {
         writeEntryPointWithTSX();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     })
-    
+
     it("The babel should be customizable from the application that is using this lib", (done) => {
         writeEntryPointWithJS();
         writeBabelRC();
@@ -249,19 +300,19 @@ describe("Basic functionality", () => {
             }
         }));
     })
-    
+
     it.each([["scss"], ["css"], ["module.css"], ["module.scss"]] as const)("Should be able to parse %s files", (styleType) => {
         writeEntryPointWithStyle(styleType);
         const promise = createAsyncCb();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(promise.callback));
         return promise;
     })
-    
+
     it("Should be able to load json", (done) => {
         writeEntryPointWithJSON();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
     });
-    
+
     it("Should be able to other type of files as simple url", (done) => {
         writeEntryWithSVG();
         createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
@@ -275,12 +326,26 @@ describe("Basic functionality", () => {
 })
 
 describe("Bug fixing", () => {
-    it.todo("Fix a problem where requiring an asset relative to another scss file imported from a different folder would request relative to the different folder");
-    it.todo("Allowing compilation of typescript files, babel would crash with some syntaxes");
-    it.todo("Defining a class with properties would fail the compilation");
-    it.todo("Requiring ttf would crash the compilation");
-    it.todo("Requiring an index.jsx from a folder would not be found");
-
+    it("Fix a problem where requiring an asset relative to another scss file imported from a different folder would request relative to the different folder", done => {
+        writeEntryWithSCSSWithRelativePath();
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
+    });
+    it("Allowing compilation of typescript files, babel would crash with some syntaxes", (done) => {
+        writeEntryPointWithTSX();
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
+    });
+    it("Defining a class with properties would fail the compilation", done => {
+        writeEntryWithSCSSWithRelativePath();
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
+    });
+    it("Requiring ttf would crash the compilation", done => {
+        writeEntryWithSCSSWithRelativePath();
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
+    });
+    it("Requiring an index.jsx from a folder would not be found", (done) => {
+        writeEntryPointWithJSX();
+        createWebpackConfiguration(testDirectory.name, 'production').run(createCompilerErrorHandler(done));
+    });
 })
 
 /**
