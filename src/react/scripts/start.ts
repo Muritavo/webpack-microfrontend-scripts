@@ -16,4 +16,4 @@ const devServer = new DevServer(
         hotOnly: true,
     }
 );
-devServer.listen(19999);
+devServer.listen(Number(process.env.PORT));

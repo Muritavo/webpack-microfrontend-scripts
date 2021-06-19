@@ -20,7 +20,9 @@
   "scripts": {
     "test": "jest",
     "prestart:react": "tsc",
-    "start:react": "node bin/react/scripts/start.js --root=./src/react/test/application",
+    "start:react": "export PORT=19001 && node bin/react/scripts/start.js --root=./src/react/test/application",
+    "prestart:react-mfe": "tsc",
+    "start:react-mfe": "export PORT=19000 && node bin/react/scripts/start.js --root=./src/react/test/microfrontend",
     "prebuild:react": "tsc",
     "build:react": "node bin/react/scripts/build.js --root=./src/react/test/application",
     "prepublish": "tsc"

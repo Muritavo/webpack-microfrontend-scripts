@@ -2,10 +2,10 @@ import './global.css';
 import './global.scss';
 import JSONObject from './somejson.json';
 import styled from 'styled-components';
-import SomeStyles from "./App.module.scss";
-import { useMemo } from 'react';
+import SomeStyles from './App.module.scss';
+import { useMemo, useState } from 'react';
 import AnotherComponent from './AnotherComponent';
-
+import { IntlProvider } from 'react-intl';
 const Title = styled.h1`
   font-size: 1.5em;
   text-align: center;
@@ -26,7 +26,22 @@ export default function App() {
 
         <p className="title">Some prop from json: {JSONObject.some}</p>
       </div>
-      <AnotherComponent/>
+      <IntlProvider locale="en-us">
+        <AnotherComponent />
+      </IntlProvider>
+      <MicrofrontendLoader />
     </>
   );
+}
+
+declare var System;
+function MicrofrontendLoader() {
+  const [LoadedModule, setLoadedModule] = useState();
+  System.import('http://localhost:19000/index.js')
+    .then((m) => {
+      setLoadedModule(() => m.default);
+    })
+    .catch(console.error);
+    console.warn(LoadedModule)
+  return LoadedModule ? <LoadedModule/> : null;
 }
