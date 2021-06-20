@@ -3,7 +3,7 @@ import './global.scss';
 import JSONObject from './somejson.json';
 import styled from 'styled-components';
 import SomeStyles from './App.module.scss';
-import { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import AnotherComponent from './AnotherComponent';
 import { IntlProvider } from 'react-intl';
 const Title = styled.h1`
@@ -11,6 +11,11 @@ const Title = styled.h1`
   text-align: center;
   color: palevioletred;
 `;
+
+console.warn(React)
+declare var __webpack_share_scopes__: any;
+
+console.warn("__webpack_share_scopes__", __webpack_share_scopes__)
 
 export default function App() {
   const oneTimeOnly = useMemo(() => new Date().toISOString(), []);
@@ -36,12 +41,20 @@ export default function App() {
 
 declare var System;
 function MicrofrontendLoader() {
-  const [LoadedModule, setLoadedModule] = useState();
-  System.import('http://localhost:19000/index.js')
-    .then((m) => {
-      setLoadedModule(() => m.default);
-    })
-    .catch(console.error);
-    console.warn(LoadedModule)
+  const [LoadedModule, setLoadedModule] = useState<React.FC>();
+  useEffect(() => {
+    System.import('http://localhost:19000/index.js')
+      .then((m: any) => {
+        m.init(__webpack_share_scopes__.default)
+        return m.get("entry")
+      })
+      .then((m) => m())
+      .then((m) => {
+        setLoadedModule(() => m.default);
+      })
+      .catch((e) => {
+        setLoadedModule(() => () => <p>Something went wrong {e.message}</p>)
+      });
+  }, []);
   return LoadedModule ? <LoadedModule/> : null;
 }

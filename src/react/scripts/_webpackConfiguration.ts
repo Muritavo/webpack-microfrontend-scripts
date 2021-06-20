@@ -2,7 +2,10 @@ import Webpack, { Configuration } from 'webpack';
 import HTMLPlugin from "html-webpack-plugin";
 import { join } from 'path';
 import { existsSync } from 'fs';
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import { container } from "webpack";
+
+const { ModuleFederationPlugin } = container
 
 export function createWebpackConfiguration(baseApplicaationDirectory: string, mode: Configuration['mode']) {
     const plugins: Configuration['plugins'] = [];
@@ -18,16 +21,36 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
         plugins.push(new ReactRefreshWebpackPlugin())
     }
 
+    plugins.push(new ModuleFederationPlugin({
+        //This will create a container
+        name: "container",
+        //Accessible via the index.js file
+        filename: "index.js",
+        //And wrapped on a systemjs format
+        library: { type: "system" },
+        //This exposes a simple module for the entrypoint
+        exposes: {
+            entry: "./src/index.ts"
+        },
+        //This means react should be shared 
+        shared: {
+            react: {
+                eager: true,
+                singleton: true,
+                requiredVersion: false
+            }
+        }
+    }))
+
     return Webpack({
         mode,
         context: baseApplicaationDirectory,
         output: {
             //Let's write to the build directory as react already does
             path: join(baseApplicaationDirectory, "build"),
-            filename: (path) => {
-                return path.chunk?.name === "main" ? "index.js" : "[name].chunk.js"
-            },
-            publicPath: "/"
+            filename: "[name].chunk.js",
+            publicPath: `/`,
+            libraryTarget: "system"
         },
         module: {
             rules: [{
@@ -83,8 +106,13 @@ export function createWebpackConfiguration(baseApplicaationDirectory: string, mo
             extensions: ['.ts', '.tsx', '.js', '.json', '.wasm', '.jsx']
         },
         entry: {
-            main: "./src/index.ts",
-            system: require.resolve("systemjs/dist/system.min.js"),
+            system: {
+                import: [require.resolve("systemjs/dist/system.min.js"), require.resolve("./scripts/init")],
+                library: {
+                    type: "umd"
+                }
+            },
+            container: require.resolve("systemjs-webpack-interop/auto-public-path")
         },
         plugins
     })

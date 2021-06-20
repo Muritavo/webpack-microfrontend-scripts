@@ -1,5 +1,8 @@
 ![npm](https://img.shields.io/npm/v/@muritavo/webpack-microfrontend-scripts)
 
+# Architecture decisions
+## This project comes bundled with the systemjs lib as it is the main library used to load microfrontends dinamically
+
 # What is this project
 This project aims to create and build scripts that are focused on compiling microfrontend applications.
 
