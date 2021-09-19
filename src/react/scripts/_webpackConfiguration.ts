@@ -1,119 +1,145 @@
-import Webpack, { Configuration } from 'webpack';
+import Webpack, { Configuration } from "webpack";
 import HTMLPlugin from "html-webpack-plugin";
-import { join } from 'path';
-import { existsSync } from 'fs';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import { join } from "path";
+import { existsSync } from "fs";
+import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { container } from "webpack";
 
-const { ModuleFederationPlugin } = container
+const { ModuleFederationPlugin } = container;
 
-export function createWebpackConfiguration(baseApplicaationDirectory: string, mode: Configuration['mode']) {
-    const plugins: Configuration['plugins'] = [];
+export function createWebpackConfiguration(
+  baseApplicaationDirectory: string,
+  mode: Configuration["mode"]
+) {
+  const plugins: Configuration["plugins"] = [];
+  const uniqueName = baseApplicaationDirectory.replace(/[^0-9a-z]/i, "");
 
-    //If the project has an index.html configured
-    if (existsSync(join(baseApplicaationDirectory, "public", "index.html"))) {
-        plugins.push(new HTMLPlugin({
-            template: join(baseApplicaationDirectory, "public", "index.html")
-        }))
-    }
+  //If the project has an index.html configured
+  if (existsSync(join(baseApplicaationDirectory, "public", "index.html"))) {
+    plugins.push(
+      new HTMLPlugin({
+        template: join(baseApplicaationDirectory, "public", "index.html"),
+      })
+    );
+  }
 
-    if (mode === "development") {
-        plugins.push(new ReactRefreshWebpackPlugin())
-    }
+  if (mode === "development") {
+    plugins.push(
+      new ReactRefreshWebpackPlugin({
+        library: uniqueName,
+      })
+    );
+  }
 
-    plugins.push(new ModuleFederationPlugin({
-        //This will create a container
-        name: "container",
-        //Accessible via the index.js file
-        filename: "index.js",
-        //And wrapped on a systemjs format
-        library: { type: "system" },
-        //This exposes a simple module for the entrypoint
-        exposes: {
-            entry: "./src/index.ts"
+  plugins.push(
+    new ModuleFederationPlugin({
+      //This will create a container
+      name: "container",
+      //Accessible via the index.js file
+      filename: "index.js",
+      //And wrapped on a systemjs format
+      library: { type: "system" },
+      //This exposes a simple module for the entrypoint
+      exposes: {
+        entry: "./src/index.ts",
+      },
+      //This means react should be shared
+      shared: {
+        react: {
+          eager: true,
+          singleton: true,
+          requiredVersion: false,
         },
-        //This means react should be shared 
-        shared: {
-            react: {
-                eager: true,
-                singleton: true,
-                requiredVersion: false
-            }
-        }
-    }))
-
-    return Webpack({
-        mode,
-        context: baseApplicaationDirectory,
-        output: {
-            //Let's write to the build directory as react already does
-            path: join(baseApplicaationDirectory, "build"),
-            filename: "[name].chunk.js",
-            publicPath: `/`,
-            libraryTarget: "system"
+        "react-refresh/runtime": {
+          eager: true,
+          singleton: true,
+          requiredVersion: false,
         },
-        module: {
-            rules: [{
-                test: /\.m?[j|t]sx?$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: require.resolve('babel-loader'),
-                    options: {
-                        // Allow customization from babelrc from the application folder
-                        babelrcRoots: [baseApplicaationDirectory],
-                        presets: [
-                            ['@babel/preset-env', { targets: "defaults" }],
-                            ['@babel/preset-react', {
-                                "runtime": "automatic"
-                            }],
-                            ['@babel/preset-typescript']
-                        ],
-                        plugins: [
-                            mode === "development" && require.resolve('react-refresh/babel'),
-                            "@babel/plugin-proposal-class-properties"
-                        ].filter(Boolean)
-                    }
-                }
-            }, {
-                test: /\.css$/i,
-                use: ["style-loader", "css-loader"],
-            }, {
-                test: /\.s[ac]ss$/i,
-                use: [
-                    // Creates `style` nodes from JS strings
-                    "style-loader",
-                    // Translates CSS into CommonJS
-                    "css-loader",
-                    // Fixes imports relative to the sass file location
-                    "resolve-url-loader",
-                    // Compiles Sass to CSS
-                    {
-                        loader: "sass-loader",
-                        options: {
-                            sourceMap: true
-                        }                      
-                    },
-                ],
-            }, {
-                test: /\.(png|jpe?g|gif|pdf|svg|ttf)$/i,
-                loader: 'file-loader',
-                options: {
-                  name: '[path][name].[ext]',
-                },
-              }]
-        },
-        resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.json', '.wasm', '.jsx']
-        },
-        entry: {
-            system: {
-                import: [require.resolve("systemjs/dist/system.min.js"), require.resolve("./scripts/init")],
-                library: {
-                    type: "umd"
-                }
-            },
-            container: require.resolve("systemjs-webpack-interop/auto-public-path")
-        },
-        plugins
+      },
     })
+  );
+
+  return Webpack({
+    mode,
+    context: baseApplicaationDirectory,
+    output: {
+      //Let's write to the build directory as react already does
+      path: join(baseApplicaationDirectory, "build"),
+      filename: "[name].chunk.js",
+      publicPath: `/`,
+      libraryTarget: "system",
+    },
+    module: {
+      rules: [
+        {
+          test: /\.m?[j|t]sx?$/,
+          exclude: /node_modules/,
+          use: {
+            loader: require.resolve("babel-loader"),
+            options: {
+              // Allow customization from babelrc from the application folder
+              babelrcRoots: [baseApplicaationDirectory],
+              presets: [
+                ["@babel/preset-env", { targets: "defaults" }],
+                [
+                  "@babel/preset-react",
+                  {
+                    runtime: "automatic",
+                  },
+                ],
+                ["@babel/preset-typescript"],
+              ],
+              plugins: [
+                mode === "development" &&
+                  require.resolve("react-refresh/babel"),
+                "@babel/plugin-proposal-class-properties",
+              ].filter(Boolean),
+            },
+          },
+        },
+        {
+          test: /\.css$/i,
+          use: ["style-loader", "css-loader"],
+        },
+        {
+          test: /\.s[ac]ss$/i,
+          use: [
+            // Creates `style` nodes from JS strings
+            "style-loader",
+            // Translates CSS into CommonJS
+            "css-loader",
+            // Fixes imports relative to the sass file location
+            "resolve-url-loader",
+            // Compiles Sass to CSS
+            {
+              loader: "sass-loader",
+              options: {
+                sourceMap: true,
+              },
+            },
+          ],
+        },
+        {
+          test: /\.(png|jpe?g|gif|pdf|svg|ttf)$/i,
+          loader: "file-loader",
+          options: {
+            name: "[path][name].[ext]",
+          },
+        },
+      ],
+    },
+    resolve: {
+      extensions: [".ts", ".tsx", ".js", ".json", ".wasm", ".jsx"],
+    },
+    entry: {
+      main: {
+        import: [require.resolve("./scripts/init")],
+        library: {
+          type: "umd",
+        },
+      },
+      container: require.resolve("systemjs-webpack-interop/auto-public-path"),
+    },
+    plugins,
+  });
 }
