@@ -33,7 +33,7 @@
     "@babel/preset-env": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@babel/preset-typescript": "^7.14.5",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.1",
     "babel-loader": "^8.2.2",
     "css-loader": "^5.2.6",
     "file-loader": "^6.2.0",
@@ -45,8 +45,8 @@
     "style-loader": "^2.0.0",
     "systemjs": "^6.10.1",
     "systemjs-webpack-interop": "^2.3.7",
-    "webpack": "^5.38.1",
-    "webpack-dev-server": "^3.11.2"
+    "webpack": "^5.53.0",
+    "webpack-dev-server": "^4.2.1"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
@@ -54,7 +54,7 @@
     "@types/react": "^17.0.11",
     "@types/react-dom": "^17.0.7",
     "@types/tmp": "^0.2.0",
-    "@types/webpack-dev-server": "^3.11.4",
+    "@types/webpack-dev-server": "^4.1.0",
     "babel-plugin-styled-components": "^1.12.0",
     "jest": "^27.0.4",
     "react": "^17.0.2",
