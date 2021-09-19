@@ -12,6 +12,8 @@ const Title = styled.h1`
   color: palevioletred;
 `;
 
+window['app-react'] = (require("react"))
+window["app-refresh"] = require("react-refresh/runtime");
 console.warn(React)
 declare var __webpack_share_scopes__: any;
 
@@ -25,7 +27,7 @@ export default function App() {
       <Title>Some title</Title>
       <h1>A simple application</h1>
       <div className="document">
-        <div className="title">Some title that is styled</div>
+        <div className="title">Some title that is styled and changes hot</div>
 
         <p className={SomeStyles.somestuff}>Some other stuff</p>
 
@@ -43,7 +45,7 @@ declare var System;
 function MicrofrontendLoader() {
   const [LoadedModule, setLoadedModule] = useState<React.FC>();
   useEffect(() => {
-    System.import('http://localhost:19000/index.js')
+    System.import('http://localhost:3501/index.js')
       .then((m: any) => {
         m.init(__webpack_share_scopes__.default)
         return m.get("entry")
