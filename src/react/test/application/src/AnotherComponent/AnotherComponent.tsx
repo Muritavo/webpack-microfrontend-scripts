@@ -9,7 +9,7 @@ export default function AnotherComponent() {
   const { formatDate } = useIntl();
   return (
     <>
-      <p className={Styles.someClass}>Another component here that hot swaps?</p>
+      <p className={Styles.someClass}>Another component here</p>
       <span className={Styles.anotherClass}>
         Another stuff at {formatDate(new Date())}
       </span>

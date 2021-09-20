@@ -43,8 +43,8 @@ The project has the following directory patterns
 - [x] Support Hot swap
 - [x] Support SVGs, PNGs, and other files as simple sources
 - [x] **Support Module federation**
+- [x] Allow any index.EXT file to be used as entrypoint
 - [ ] Allow webpack manipulation from the base folder of the application
-- [ ] Allow any index.EXT file to be used as entrypoint
 - [ ] Setup precaching of the application with custom service worker
 - [ ] Allow multiple microfrontends being developed together
 

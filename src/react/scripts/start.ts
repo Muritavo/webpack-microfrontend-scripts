@@ -12,13 +12,13 @@ const devServer = new DevServer(
   {
     hot: true,
     client: {
-        overlay: false,
-        progress: false
+      overlay: false,
+      progress: false,
     },
     headers: {
-        "Access-Control-Allow-Origin": "*"
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   },
-  createWebpackConfiguration(root, mode)
+  createWebpackConfiguration(root, mode) as any
 );
 devServer.listen(Number(process.env.PORT || "3500"));

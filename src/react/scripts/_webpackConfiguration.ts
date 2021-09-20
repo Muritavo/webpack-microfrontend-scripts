@@ -41,7 +41,7 @@ export function createWebpackConfiguration(
       library: { type: "system" },
       //This exposes a simple module for the entrypoint
       exposes: {
-        entry: "./src/index.ts",
+        entry: "./src/index",
       },
       //This means react should be shared
       shared: {
