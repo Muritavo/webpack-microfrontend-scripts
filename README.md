@@ -49,7 +49,7 @@ The project has the following directory patterns
 - [ ] Allow multiple microfrontends being developed together
 
 ## Optimizations
+- [x] Experiment with configuring module federation with uninstalled libraries (for example N mfes use a library that some don't use)
 - [ ] Separate the CSS from JS source (replace the style-loader by the mini-css-extract-plugin)
 - [ ] Support JSON treeshaking
 - [ ] Support SVG bundling / Reduce amount of small SVG files
-- [ ] Experiment with configuring module federation with uninstalled libraries (for example N mfes use a library that some don't use)
