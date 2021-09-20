@@ -44,7 +44,7 @@ export function createWebpackConfiguration(
         entry: "./src/index",
       },
       //This means react should be shared
-      shared: {
+      shared: [{
         react: {
           eager: true,
           singleton: true,
@@ -55,7 +55,7 @@ export function createWebpackConfiguration(
           singleton: true,
           requiredVersion: false,
         },
-      },
+      }, 'firebase/app'],
     })
   );
 

@@ -1,14 +1,21 @@
 import { IntlProvider, useIntl } from "react-intl";
+import { SDK_VERSION } from "firebase/app";
 console.warn("Here also works");
 
 export default function Comp() {
   return (
     <IntlProvider locale={"pt-br"}>
       <Test />
+      <h1>
+        In this microfrontend application we have a shared module for firebase
+        that is not shared on the main application
+      </h1>
+      <p>Version: {SDK_VERSION}</p>
     </IntlProvider>
   );
 }
 
+window["mfe-firebase"] = require("firebase/app");
 window["mfe-react"] = require("react");
 window["mfe-refresh"] = require("react-refresh/runtime");
 
