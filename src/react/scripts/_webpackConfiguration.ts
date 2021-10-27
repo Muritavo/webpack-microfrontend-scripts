@@ -19,6 +19,7 @@ export function createWebpackConfiguration(
     plugins.push(
       new HTMLPlugin({
         template: join(baseApplicaationDirectory, "public", "index.html"),
+        excludeChunks: ["container"],
       })
     );
   }
@@ -41,7 +42,10 @@ export function createWebpackConfiguration(
       library: { type: "system" },
       //This exposes a simple module for the entrypoint
       exposes: {
-        entry: "./src/index",
+        entry: {
+          import: ["./src/index"],
+          name: "principal"
+        },
       },
       //This means react should be shared
       shared: [{

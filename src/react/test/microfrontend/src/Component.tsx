@@ -7,7 +7,7 @@ export default function Comp() {
     <IntlProvider locale={"pt-br"}>
       <Test />
       <h1>
-        In this microfrontend application we have a shared module for firebase
+        In this microfrontend application (microfrontend) we have a shared module for firebase
         that is not shared on the main application
       </h1>
       <p>Version: {SDK_VERSION}</p>

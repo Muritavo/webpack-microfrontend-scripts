@@ -323,9 +323,7 @@ describe("Basic functionality", () => {
         writePublicHTML();
         createWebpackConfiguration(testDirectory.name, 'production').run(asyncWrapper(done, () => {
             //Should contain the chunk that contains the systemjs registration
-            expect(readFileSync(join(testDirectory.name, "build", "index.html")).toString()).toContain('system.chunk.js')
-            //Should contain the index.js chunk that contains the base application
-            expect(readFileSync(join(testDirectory.name, "build", "index.html")).toString()).toContain('index.js')
+            expect(readFileSync(join(testDirectory.name, "build", "index.html")).toString()).toContain('main.chunk.js')
             done();
         }));
     });

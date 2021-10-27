@@ -45,7 +45,7 @@ declare var System;
 function MicrofrontendLoader() {
   const [LoadedModule, setLoadedModule] = useState<React.FC>();
   useEffect(() => {
-    System.import('http://localhost:3501/index.js')
+    System.import('http://localhost:19000/index.js')
       .then((m: any) => {
         m.init(__webpack_share_scopes__.default)
         return m.get("entry")

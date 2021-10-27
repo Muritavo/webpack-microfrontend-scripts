@@ -14,7 +14,7 @@
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/../../../../bin/react/scripts/start.js",
             "env": {
-                "PORT": "3501"
+                "PORT": "19000"
             }
         }
     ]

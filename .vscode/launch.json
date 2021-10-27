@@ -5,10 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start compilation",
+            "name": "Start main",
             "program": "${workspaceFolder}/bin/react/scripts/start.js",
             "request": "launch",
             "cwd": "${workspaceFolder}/src/react/test/application",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },
+        {
+            "name": "Start micrpfrontend",
+            "program": "${workspaceFolder}/bin/react/scripts/start.js",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/src/react/test/microfrontend",
             "skipFiles": [
                 "<node_internals>/**"
             ],
