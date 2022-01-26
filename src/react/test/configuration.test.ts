@@ -247,6 +247,42 @@ ReactDOM.render(React.createElement(Component), document.body);
     );
 }
 
+function writeFileWithBaseUrl() {
+    writePublicHTML();
+    mkdirSync(join(testDirectory.name, "src"));
+    mkdirSync(
+      join(
+        testDirectory.name,
+        "src",
+        "some",
+        "module",
+        "resolved",
+        "from",
+        "src"
+      ),
+      { recursive: true }
+    );
+    writeFileSync(
+      join(
+        testDirectory.name,
+        "src",
+        "some",
+        "module",
+        "resolved",
+        "from",
+        "src",
+        "module.ts"
+      ),
+      `export function exampleFunction() { return "It works"; }`
+    );
+    writeFileSync(
+        join(testDirectory.name, 'src', 'index.ts'),
+        `import { exampleFunction } from "some/module/resolved/from/src/module.ts";
+
+console.warn(exampleFunction())`,
+    );
+}
+
 describe("Basic functionality", () => {
     it('Should compile when the folder has a src/index.ts entrypoint', (done) => {
         writeEntryPoint();
@@ -325,6 +361,19 @@ describe("Basic functionality", () => {
             //Should contain the chunk that contains the systemjs registration
             expect(readFileSync(join(testDirectory.name, "build", "index.html")).toString()).toContain('main.chunk.js')
             done();
+        }));
+    });
+
+    it("Should be able to load the module from the src as baseUrl", (done) => {
+        writeFileWithBaseUrl();
+        createWebpackConfiguration(testDirectory.name, 'production').run(asyncWrapper(done, (_error, r) => {
+            if (_error || r!.hasErrors()) {
+                createCompilerErrorHandler(done)(_error, r);
+            } else {
+                //Should contain the chunk that contains the systemjs registration
+                expect(readFileSync(join(testDirectory.name, "build", "index.html")).toString()).toContain('main.chunk.js')
+                done();
+            }
         }));
     });
 
