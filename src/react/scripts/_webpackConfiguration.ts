@@ -4,6 +4,7 @@ import { join } from "path";
 import { existsSync } from "fs";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { container } from "webpack";
+import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 
 const { ModuleFederationPlugin } = container;
 
@@ -44,26 +45,29 @@ export function createWebpackConfiguration(
       exposes: {
         entry: {
           import: ["./src/index"],
-          name: "principal"
+          name: "principal",
         },
       },
       //This means react should be shared
-      shared: [{
-        react: {
-          eager: true,
-          singleton: true,
-          requiredVersion: false,
+      shared: [
+        {
+          react: {
+            eager: true,
+            singleton: true,
+            requiredVersion: false,
+          },
+          "react-refresh/runtime": {
+            eager: true,
+            singleton: true,
+            requiredVersion: false,
+          },
         },
-        "react-refresh/runtime": {
-          eager: true,
-          singleton: true,
-          requiredVersion: false,
-        },
-      }, 'firebase/app'],
+        "firebase/app",
+      ],
     })
   );
 
-  return Webpack({
+  const baseConfig: Configuration = {
     mode,
     context: baseApplicaationDirectory,
     output: {
@@ -96,7 +100,8 @@ export function createWebpackConfiguration(
               plugins: [
                 mode === "development" &&
                   require.resolve("react-refresh/babel"),
-                "@babel/plugin-proposal-class-properties",
+                require.resolve("@babel/plugin-proposal-class-properties"),
+                require.resolve("@babel/plugin-transform-runtime"),
               ].filter(Boolean),
             },
           },
@@ -133,7 +138,19 @@ export function createWebpackConfiguration(
       ],
     },
     resolve: {
+      plugins: [
+        new TsconfigPathsPlugin({
+          extensions: [".ts", ".tsx", ".js"],
+          logLevel: "INFO",
+          logInfoToStdOut: true,
+        }),
+      ],
       extensions: [".ts", ".tsx", ".js", ".json", ".wasm", ".jsx"],
+      modules: [
+        join(baseApplicaationDirectory, "src"),
+        "node_modules",
+        join(baseApplicaationDirectory, "node_modules"),
+      ],
     },
     entry: {
       main: {
@@ -145,5 +162,17 @@ export function createWebpackConfiguration(
       container: require.resolve("systemjs-webpack-interop/auto-public-path"),
     },
     plugins,
-  });
+  };
+
+  return Webpack(loadCustomizer(baseApplicaationDirectory)(baseConfig));
+}
+
+function loadCustomizer(
+  baseDir: string
+): (config: Configuration) => Configuration {
+  try {
+    return require(join(baseDir, "custom-config.js")).webpack;
+  } catch (e) {
+    return (c) => c;
+  }
 }
