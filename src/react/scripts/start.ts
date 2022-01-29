@@ -18,7 +18,8 @@ const devServer = new DevServer(
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
+    port: Number(process.env.PORT || "3500"),
   },
   createWebpackConfiguration(root, mode) as any
 );
-devServer.listen(Number(process.env.PORT || "3500"));
+devServer.start();

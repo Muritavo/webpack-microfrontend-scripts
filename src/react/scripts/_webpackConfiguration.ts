@@ -1,12 +1,16 @@
-import Webpack, { Configuration } from "webpack";
+import Webpack, { Configuration, SourceMapDevToolPlugin } from "webpack";
 import HTMLPlugin from "html-webpack-plugin";
 import { join } from "path";
 import { existsSync } from "fs";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { container } from "webpack";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
-
+import MiniCssExtractPlugin, { loader } from "mini-css-extract-plugin";
 const { ModuleFederationPlugin } = container;
+
+function mainCssLoader(mode: Configuration["mode"]) {
+  return mode === "development" ? "style-loader" : loader;
+}
 
 export function createWebpackConfiguration(
   baseApplicaationDirectory: string,
@@ -31,6 +35,11 @@ export function createWebpackConfiguration(
         library: uniqueName,
       })
     );
+    plugins.push(new SourceMapDevToolPlugin({}));
+  }
+
+  if (mode === "production") {
+    plugins.push(new MiniCssExtractPlugin());
   }
 
   plugins.push(
@@ -108,15 +117,25 @@ export function createWebpackConfiguration(
         },
         {
           test: /\.css$/i,
-          use: ["style-loader", "css-loader"],
+          use: [mainCssLoader(mode), "css-loader"],
         },
         {
           test: /\.s[ac]ss$/i,
           use: [
             // Creates `style` nodes from JS strings
-            "style-loader",
+            mainCssLoader(mode),
             // Translates CSS into CommonJS
-            "css-loader",
+            {
+              loader: "css-loader",
+              options: {
+                modules: {
+                  localIdentName:
+                    mode === "development"
+                      ? "[name]__[local]"
+                      : "[hash:base64]",
+                },
+              },
+            },
             // Fixes imports relative to the sass file location
             "resolve-url-loader",
             // Compiles Sass to CSS
@@ -141,15 +160,15 @@ export function createWebpackConfiguration(
       plugins: [
         new TsconfigPathsPlugin({
           extensions: [".ts", ".tsx", ".js"],
-          logLevel: "INFO",
-          logInfoToStdOut: true,
+          logInfoToStdOut: false,
+          silent: true,
         }),
       ],
       extensions: [".ts", ".tsx", ".js", ".json", ".wasm", ".jsx"],
       modules: [
         join(baseApplicaationDirectory, "src"),
-        "node_modules",
         join(baseApplicaationDirectory, "node_modules"),
+        "node_modules",
       ],
     },
     entry: {
@@ -162,6 +181,10 @@ export function createWebpackConfiguration(
       container: require.resolve("systemjs-webpack-interop/auto-public-path"),
     },
     plugins,
+    stats: "none",
+    infrastructureLogging: {
+      level: "none",
+    },
   };
 
   return Webpack(loadCustomizer(baseApplicaationDirectory)(baseConfig));
