@@ -334,6 +334,59 @@ console.warn(exampleFunction())`
   );
 }
 
+function writeLibrary(path: string) {
+  const baseDir = join(path, "duplicated_module");
+  if (!existsSync(baseDir)) mkdirSync(baseDir, { recursive: true });
+  writeFileSync(
+    join(baseDir, "package.json"),
+    `{
+  "name": "duplicated_module",
+  "version": "1.0.0",
+  "main": "index.js"
+}`
+  );
+  writeFileSync(
+    join(baseDir, "index.js"),
+    `module.exports = () => console.warn('meu deus que teste chato')`
+  );
+}
+function writeEntryPointWithDuplicatedDependencyBecauseOfLink() {
+  writeLibrary("node_modules");
+  const dpeendencyModulePath = join(
+    testDirectory.name,
+    "node_modules",
+    "dependency"
+  );
+  writeLibrary(join(dpeendencyModulePath, "node_modules"));
+
+  if (!existsSync(dpeendencyModulePath))
+    mkdirSync(dpeendencyModulePath, { recursive: true });
+  writeFileSync(
+    join(dpeendencyModulePath, "index.js"),
+    `import someFunc from 'duplicated_module'
+    
+export default someFunc;`
+  );
+  writeFileSync(
+    join(dpeendencyModulePath, "package.json"),
+    `{
+  "name": "dependency",
+  "version": "1.5.0",
+  "main": "index.js"
+}`
+  );
+
+  const srcDir = join(testDirectory.name, "src");
+  if (!existsSync(srcDir)) mkdirSync(srcDir);
+  writeFileSync(
+    join(srcDir, "index.js"),
+    `import someFunc from "dependency";
+import anotherFunc from "duplicated_module";
+  
+console.warn("fechou" + someFunc() + anotherFunc())`
+  );
+}
+
 describe("Basic functionality", () => {
   it("Should compile when the folder has a src/index.ts entrypoint", (done) => {
     writeEntryPoint();
@@ -483,6 +536,19 @@ describe("Basic functionality", () => {
           join(testDirectory.name, "build", "principal.css")
         ).toString();
         expect(css).toMatchSnapshot();
+        done();
+      })
+    );
+  });
+
+  it("Should decide for an existing module version if working with linked libraries", (done) => {
+    writeEntryPointWithDuplicatedDependencyBecauseOfLink();
+    createWebpackConfiguration(testDirectory.name, "production").run(
+      asyncWrapper(done, (_, stats) => {
+        const modules = stats!
+          .toJson()
+          .modules!.filter((m) => m.name?.includes("duplicated_module"));
+        expect(modules).toHaveLength(1);
         done();
       })
     );

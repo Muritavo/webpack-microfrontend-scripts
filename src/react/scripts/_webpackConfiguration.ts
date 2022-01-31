@@ -6,6 +6,7 @@ import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { container } from "webpack";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import MiniCssExtractPlugin, { loader } from "mini-css-extract-plugin";
+import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
 const { ModuleFederationPlugin } = container;
 
 function mainCssLoader(mode: Configuration["mode"]) {
@@ -148,7 +149,24 @@ export function createWebpackConfiguration(
           ],
         },
         {
-          test: /\.(png|jpe?g|gif|pdf|svg|ttf)$/i,
+          test: /\.svg$/i,
+          use: [
+            {
+              loader: require.resolve("@svgr/webpack"),
+              options: {
+                exportType: "named",
+              },
+            },
+            {
+              loader: require.resolve("file-loader"),
+            },
+          ],
+          issuer: {
+            and: [/\.(ts|tsx|js|jsx|md|mdx)$/],
+          },
+        },
+        {
+          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg)$/i,
           loader: "file-loader",
           options: {
             name: "[path][name].[ext]",
@@ -163,12 +181,13 @@ export function createWebpackConfiguration(
           logInfoToStdOut: false,
           silent: true,
         }),
+        LibraryVersionOptimizerPlugin,
       ],
       extensions: [".ts", ".tsx", ".js", ".json", ".wasm", ".jsx"],
       modules: [
         join(baseApplicaationDirectory, "src"),
-        join(baseApplicaationDirectory, "node_modules"),
         "node_modules",
+        join(baseApplicaationDirectory, "node_modules"),
       ],
     },
     entry: {
