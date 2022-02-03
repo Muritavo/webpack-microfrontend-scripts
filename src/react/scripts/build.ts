@@ -14,7 +14,7 @@ createWebpackConfiguration(root, mode).run((error, stats) => {
         process.exit(1);
     }
     if (stats?.hasErrors()) {
-        console.error("Some errors have ocurred during the compiltation, please, check the details below:");
+        console.error("Some errors have ocurred during the compilation, please, check the details below:");
         console.error(stats.compilation.errors.map((e) => typeof e === "string" ? e : e.message).join('\n'));
         process.exit(1);
     }

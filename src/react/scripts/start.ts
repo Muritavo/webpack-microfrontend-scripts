@@ -15,6 +15,9 @@ const devServer = new DevServer(
       overlay: false,
       progress: false,
     },
+    historyApiFallback: {
+      index: '/'
+    },
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
