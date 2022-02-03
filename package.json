@@ -1,6 +1,6 @@
 {
   "name": "@muritavo/webpack-microfrontend-scripts",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A series of webpack build and watch script with microfrontends in mind",
   "main": "index.js",
   "author": "Murilo Oliveira de Araujo",
@@ -12,7 +12,8 @@
     "react-build": "./bin/react/scripts/build.js"
   },
   "files": [
-    "bin"
+    "bin",
+    "index.d.ts"
   ],
   "repository": {
     "type": "git",
