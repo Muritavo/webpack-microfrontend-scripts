@@ -13,7 +13,7 @@ function mainCssLoader(mode: Configuration["mode"]) {
   return mode === "development" ? "style-loader" : loader;
 }
 
-export function createWebpackConfiguration(
+export function createBaseConfiguration(
   baseApplicaationDirectory: string,
   mode: Configuration["mode"]
 ) {
@@ -166,7 +166,7 @@ export function createWebpackConfiguration(
           },
         },
         {
-          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg)$/i,
+          test: /\.(png|jpe?g|gif|pdf|ttf|otf)$/i,
           loader: "file-loader",
           options: {
             name: "[path][name].[ext]",
@@ -206,7 +206,14 @@ export function createWebpackConfiguration(
     },
   };
 
-  return Webpack(loadCustomizer(baseApplicaationDirectory)(baseConfig));
+  return loadCustomizer(baseApplicaationDirectory)(baseConfig);
+}
+
+export function createWebpackConfiguration(
+  baseApplicaationDirectory: string,
+  mode: Configuration["mode"]
+) {
+  return Webpack(createBaseConfiguration(baseApplicaationDirectory, mode));
 }
 
 function loadCustomizer(
