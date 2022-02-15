@@ -387,6 +387,15 @@ console.warn("fechou" + someFunc() + anotherFunc())`
   );
 }
 
+function writeEntryThatConsumesNativeStreamApi() {
+  const srcDir = join(testDirectory.name, "src");
+  if (!existsSync(srcDir)) mkdirSync(srcDir);
+  writeFileSync(
+    join(srcDir, "index.js"),
+    `console.warn("STREAM" + require("stream"))`
+  );
+}
+
 describe("Basic functionality", () => {
   it("Should compile when the folder has a src/index.ts entrypoint", (done) => {
     writeEntryPoint();
@@ -536,6 +545,16 @@ describe("Basic functionality", () => {
           join(testDirectory.name, "build", "principal.css")
         ).toString();
         expect(css).toMatchSnapshot();
+        done();
+      })
+    );
+  });
+
+  it("Should allow importing of native nodejs builtins for web", (done) => {
+    writeEntryThatConsumesNativeStreamApi();
+    createWebpackConfiguration(testDirectory.name, "production").run(
+      asyncWrapper(done, (_, stats) => {
+        expect(stats!.hasErrors()).toBeFalsy()
         done();
       })
     );

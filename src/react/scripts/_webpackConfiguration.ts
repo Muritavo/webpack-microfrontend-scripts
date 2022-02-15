@@ -149,6 +149,13 @@ export function createBaseConfiguration(
           ],
         },
         {
+          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg)$/i,
+          loader: "file-loader",
+          options: {
+            name: "[path][name].[ext]",
+          },
+        },
+        {
           test: /\.svg$/i,
           use: [
             {
@@ -163,13 +170,6 @@ export function createBaseConfiguration(
           ],
           issuer: {
             and: [/\.(ts|tsx|js|jsx|md|mdx)$/],
-          },
-        },
-        {
-          test: /\.(png|jpe?g|gif|pdf|ttf|otf)$/i,
-          loader: "file-loader",
-          options: {
-            name: "[path][name].[ext]",
           },
         },
       ],
@@ -189,6 +189,10 @@ export function createBaseConfiguration(
         "node_modules",
         join(baseApplicaationDirectory, "node_modules"),
       ],
+      fallback: {
+        stream: require.resolve("stream-browserify"),
+        buffer: require.resolve("buffer"),
+      },
     },
     entry: {
       main: {
