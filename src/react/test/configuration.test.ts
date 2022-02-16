@@ -392,7 +392,7 @@ function writeEntryThatConsumesNativeStreamApi() {
   if (!existsSync(srcDir)) mkdirSync(srcDir);
   writeFileSync(
     join(srcDir, "index.js"),
-    `console.warn("STREAM" + require("stream"))`
+    `console.warn("STREAM",["stream",'crypto',"http","https", "url", "assert", "os"].map(a => require(a)))`
   );
 }
 
@@ -554,7 +554,9 @@ describe("Basic functionality", () => {
     writeEntryThatConsumesNativeStreamApi();
     createWebpackConfiguration(testDirectory.name, "production").run(
       asyncWrapper(done, (_, stats) => {
-        expect(stats!.hasErrors()).toBeFalsy()
+        if (stats!.hasErrors()) console.warn(stats!.compilation.errors);
+
+        expect(stats!.hasErrors()).toBeFalsy();
         done();
       })
     );

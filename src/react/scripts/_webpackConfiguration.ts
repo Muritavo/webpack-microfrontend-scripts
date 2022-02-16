@@ -149,13 +149,6 @@ export function createBaseConfiguration(
           ],
         },
         {
-          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg)$/i,
-          loader: "file-loader",
-          options: {
-            name: "[path][name].[ext]",
-          },
-        },
-        {
           test: /\.svg$/i,
           use: [
             {
@@ -170,6 +163,13 @@ export function createBaseConfiguration(
           ],
           issuer: {
             and: [/\.(ts|tsx|js|jsx|md|mdx)$/],
+          },
+        },
+        {
+          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg)$/i,
+          loader: "file-loader",
+          options: {
+            name: "[path][name].[ext]",
           },
         },
       ],
@@ -192,6 +192,16 @@ export function createBaseConfiguration(
       fallback: {
         stream: require.resolve("stream-browserify"),
         buffer: require.resolve("buffer"),
+        crypto: require.resolve("crypto-browserify"),
+        http: require.resolve("stream-http"),
+        url: require.resolve(
+          join(__dirname, "..", "..", "..", "node_modules", "url")
+        ),
+        https: require.resolve("https-browserify"),
+        assert: require.resolve(
+          join(__dirname, "..", "..", "..", "node_modules", "assert")
+        ),
+        os: require.resolve('os-browserify/browser'),
       },
     },
     entry: {
