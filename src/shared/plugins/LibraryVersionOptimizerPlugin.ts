@@ -1,5 +1,13 @@
 import { Plugin, ResolveRequest } from "enhanced-resolve";
 
+const versionMap: {
+  [LIB: string]: {
+    versions: {
+      version: string;
+      baseContext: string;
+    }[];
+  };
+} = {};
 /**
  * This plugin allows for single resolving of same version modules
  *
@@ -7,14 +15,6 @@ import { Plugin, ResolveRequest } from "enhanced-resolve";
  */
 const LibraryVersionOptimizerPlugin: Plugin = {
   apply(r) {
-    const versionMap: {
-      [LIB: string]: {
-        versions: {
-          version: string;
-          baseContext: string;
-        }[];
-      };
-    } = {};
     const target = r.ensureHook("Linked library plugin");
     r.getHook("described-resolve").tapAsync(
       "Linked library plugin",
@@ -41,7 +41,6 @@ const LibraryVersionOptimizerPlugin: Plugin = {
               );
             }
           ).catch(() => null);
-
           if (resolved !== null) {
             const data = resolved.descriptionFileData! as {
               version: string;

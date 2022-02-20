@@ -1,4 +1,9 @@
-import Webpack, { Configuration, SourceMapDevToolPlugin } from "webpack";
+import Webpack, {
+  Configuration,
+  SourceMapDevToolPlugin,
+  DefinePlugin,
+  ProvidePlugin,
+} from "webpack";
 import HTMLPlugin from "html-webpack-plugin";
 import { join } from "path";
 import { existsSync } from "fs";
@@ -74,6 +79,13 @@ export function createBaseConfiguration(
         },
         "firebase/app",
       ],
+    }),
+    new DefinePlugin({
+      "process.env": {},
+    }),
+    new ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+      process: "process/browser",
     })
   );
 
@@ -86,6 +98,9 @@ export function createBaseConfiguration(
       filename: "[name].chunk.js",
       publicPath: `/`,
       libraryTarget: "system",
+    },
+    node: {
+      global: true,
     },
     module: {
       rules: [
@@ -107,6 +122,7 @@ export function createBaseConfiguration(
                 ],
                 ["@babel/preset-typescript"],
               ],
+              sourceType: "unambiguous",
               plugins: [
                 mode === "development" &&
                   require.resolve("react-refresh/babel"),
@@ -201,7 +217,7 @@ export function createBaseConfiguration(
         assert: require.resolve(
           join(__dirname, "..", "..", "..", "node_modules", "assert")
         ),
-        os: require.resolve('os-browserify/browser'),
+        os: require.resolve("os-browserify/browser"),
       },
     },
     entry: {
