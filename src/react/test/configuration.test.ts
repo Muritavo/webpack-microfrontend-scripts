@@ -4,6 +4,8 @@ import {
   readdirSync,
   readFileSync,
   rmdirSync,
+  stat,
+  statSync,
   symlink,
   symlinkSync,
   writeFileSync,
@@ -12,21 +14,8 @@ import { join } from "path";
 import { DirResult, dirSync } from "tmp";
 import { Stats } from "webpack";
 import { createWebpackConfiguration } from "../scripts/_webpackConfiguration";
-
 let testDirectory: DirResult;
 const tmpPath = join(__dirname, "tmp");
-beforeEach(() => {
-  if (!existsSync(tmpPath)) mkdirSync(tmpPath);
-  testDirectory = dirSync({
-    tmpdir: tmpPath,
-  });
-});
-
-afterEach(() => {
-  rmdirSync(testDirectory.name, {
-    recursive: true,
-  });
-});
 
 afterAll(() => {
   rmdirSync(tmpPath, {
@@ -395,128 +384,123 @@ function writeEntryThatConsumesNativeStreamApi() {
     `console.warn("STREAM",["stream",'crypto',"http","https", "url", "assert", "os"].map(a => require(a)))`
   );
 }
-
-describe("Basic functionality", () => {
-  it("Should compile when the folder has a src/index.ts entrypoint", (done) => {
-    writeEntryPoint();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
+describe("Base", () => {
+  beforeEach(() => {
+    if (!existsSync(tmpPath)) mkdirSync(tmpPath);
+    testDirectory = dirSync({
+      tmpdir: tmpPath,
+    });
   });
 
-  it("Should not have a index.html if the compilation doesn't have a public html configured", (done) => {
-    writeEntryPoint();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, (_error, r) => {
-        if (_error || r!.hasErrors()) {
-          createCompilerErrorHandler(done)(_error, r);
-        } else {
-          expect(
-            existsSync(join(testDirectory.name, "build", "index.html"))
-          ).toBe(false);
-          done();
-        }
-      })
-    );
+  afterEach(() => {
+    rmdirSync(testDirectory.name, {
+      recursive: true,
+    });
   });
 
-  it("Should have an index.html if the compilation does have a public html configured", (done) => {
-    writeEntryPoint();
-    writePublicHTML();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, (_error, r) => {
-        if (_error || r!.hasErrors()) {
-          createCompilerErrorHandler(done)(_error, r);
-        } else {
-          expect(
-            existsSync(join(testDirectory.name, "build", "index.html"))
-          ).toBe(true);
-          done();
-        }
-      })
-    );
-  });
-
-  it("Should be able to parse js files", (done) => {
-    writeEntryPointWithJS();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
-
-  it("Should be able to parse tsx files", (done) => {
-    writeEntryPointWithTSX();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
-
-  it("The babel should be customizable from the application that is using this lib", (done) => {
-    writeEntryPointWithJS();
-    writeBabelRC();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, (_error, r) => {
-        if (_error || r!.hasErrors()) {
-          createCompilerErrorHandler(done)(_error, r);
-        } else {
-          expect(
-            require.cache[join(testDirectory.name, ".babelrc.js")]
-          ).toBeDefined();
-          done();
-        }
-      })
-    );
-  });
-
-  it.each([["scss"], ["css"], ["module.css"], ["module.scss"]] as const)(
-    "Should be able to parse %s files",
-    (styleType) => {
-      writeEntryPointWithStyle(styleType);
-      const promise = createAsyncCb();
+  describe("Basic functionality", () => {
+    it("Should compile when the folder has a src/index.ts entrypoint", (done) => {
+      writeEntryPoint();
       createWebpackConfiguration(testDirectory.name, "production").run(
-        createCompilerErrorHandler(promise.callback)
+        createCompilerErrorHandler(done)
       );
-      return promise;
-    }
-  );
+    });
 
-  it("Should be able to load json", (done) => {
-    writeEntryPointWithJSON();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
+    it("Should not have a index.html if the compilation doesn't have a public html configured", (done) => {
+      writeEntryPoint();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, (_error, r) => {
+          if (_error || r!.hasErrors()) {
+            createCompilerErrorHandler(done)(_error, r);
+          } else {
+            expect(
+              existsSync(join(testDirectory.name, "build", "index.html"))
+            ).toBe(false);
+            done();
+          }
+        })
+      );
+    });
+
+    it("Should have an index.html if the compilation does have a public html configured", (done) => {
+      writeEntryPoint();
+      writePublicHTML();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, (_error, r) => {
+          if (_error || r!.hasErrors()) {
+            createCompilerErrorHandler(done)(_error, r);
+          } else {
+            expect(
+              existsSync(join(testDirectory.name, "build", "index.html"))
+            ).toBe(true);
+            done();
+          }
+        })
+      );
+    });
+
+    it("Should be able to parse js files", (done) => {
+      writeEntryPointWithJS();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
+
+    it("Should be able to parse tsx files", (done) => {
+      writeEntryPointWithTSX();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
+
+    it("The babel should be customizable from the application that is using this lib", (done) => {
+      writeEntryPointWithJS();
+      writeBabelRC();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, (_error, r) => {
+          if (_error || r!.hasErrors()) {
+            createCompilerErrorHandler(done)(_error, r);
+          } else {
+            expect(
+              require.cache[join(testDirectory.name, ".babelrc.js")]
+            ).toBeDefined();
+            done();
+          }
+        })
+      );
+    });
+
+    it.each([["scss"], ["css"], ["module.css"], ["module.scss"]] as const)(
+      "Should be able to parse %s files",
+      (styleType) => {
+        writeEntryPointWithStyle(styleType);
+        const promise = createAsyncCb();
+        createWebpackConfiguration(testDirectory.name, "production").run(
+          createCompilerErrorHandler(promise.callback)
+        );
+        return promise;
+      }
     );
-  });
 
-  it("Should be able to other type of files as simple url", (done) => {
-    writeEntryWithSVG();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
+    it("Should be able to load json", (done) => {
+      writeEntryPointWithJSON();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
 
-  it("Should embeed the systemjs chunk and the main chunk", (done) => {
-    writeEntryPoint();
-    writePublicHTML();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, () => {
-        //Should contain the chunk that contains the systemjs registration
-        expect(
-          readFileSync(
-            join(testDirectory.name, "build", "index.html")
-          ).toString()
-        ).toContain("main.chunk.js");
-        done();
-      })
-    );
-  });
+    it("Should be able to other type of files as simple url", (done) => {
+      writeEntryWithSVG();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
 
-  it("Should be able to load the module from the src as baseUrl", (done) => {
-    writeFileWithBaseUrl();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, (_error, r) => {
-        if (_error || r!.hasErrors()) {
-          createCompilerErrorHandler(done)(_error, r);
-        } else {
+    it("Should embeed the systemjs chunk and the main chunk", (done) => {
+      writeEntryPoint();
+      writePublicHTML();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, () => {
           //Should contain the chunk that contains the systemjs registration
           expect(
             readFileSync(
@@ -524,92 +508,260 @@ describe("Basic functionality", () => {
             ).toString()
           ).toContain("main.chunk.js");
           done();
-        }
-      })
+        })
+      );
+    });
+
+    it("Should be able to load the module from the src as baseUrl", (done) => {
+      writeFileWithBaseUrl();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, (_error, r) => {
+          if (_error || r!.hasErrors()) {
+            createCompilerErrorHandler(done)(_error, r);
+          } else {
+            //Should contain the chunk that contains the systemjs registration
+            expect(
+              readFileSync(
+                join(testDirectory.name, "build", "index.html")
+              ).toString()
+            ).toContain("main.chunk.js");
+            done();
+          }
+        })
+      );
+    });
+
+    /**
+     * When experimenting with the microfrontends arhitecture, using this react predefined loader, it doesn't load the main class, making some styles break
+     * Let's refactor this with help from the documentation
+     */
+    it.todo(
+      "Should be able to load all css files when using the mini-css-extract-plugin"
     );
+
+    it("Should give us descriptive css naming for classes", (done) => {
+      writeEntryPointWithStyle("module.scss", true);
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, (_error) => {
+          const css = readFileSync(
+            join(testDirectory.name, "build", "principal.css")
+          ).toString();
+          expect(css).toMatchSnapshot();
+          done();
+        })
+      );
+    });
+
+    it("Should allow importing of native nodejs builtins for web", (done) => {
+      writeEntryThatConsumesNativeStreamApi();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, (_, stats) => {
+          if (stats!.hasErrors()) console.warn(stats!.compilation.errors);
+
+          expect(stats!.hasErrors()).toBeFalsy();
+          done();
+        })
+      );
+    });
+
+    it("Should decide for an existing module version if working with linked libraries", (done) => {
+      writeEntryPointWithDuplicatedDependencyBecauseOfLink();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        asyncWrapper(done, (_, stats) => {
+          const modules = stats!
+            .toJson()
+            .modules!.filter((m) => m.name?.includes("duplicated_module"));
+          expect(modules).toHaveLength(1);
+          done();
+        })
+      );
+    });
   });
 
-  /**
-   * When experimenting with the microfrontends arhitecture, using this react predefined loader, it doesn't load the main class, making some styles break
-   * Let's refactor this with help from the documentation
-   */
-  it.todo(
-    "Should be able to load all css files when using the mini-css-extract-plugin"
+  describe("Bug fixing", () => {
+    it("Fix a problem where requiring an asset relative to another scss file imported from a different folder would request relative to the different folder", (done) => {
+      writeEntryWithSCSSWithRelativePath();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
+    it("Allowing compilation of typescript files, babel would crash with some syntaxes", (done) => {
+      writeEntryPointWithTSX();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
+    it("Defining a class with properties would fail the compilation", (done) => {
+      writeEntryWithSCSSWithRelativePath();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
+    it("Requiring ttf would crash the compilation", (done) => {
+      writeEntryWithSCSSWithRelativePath();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
+    it("Requiring an index.jsx from a folder would not be found", (done) => {
+      writeEntryPointWithJSX();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        createCompilerErrorHandler(done)
+      );
+    });
+  });
+});
+
+function writeExampleBuildApplication() {
+  mkdirSync(join(testDirectory.name, "src"));
+  ["othermodule", "averybigmodule"].forEach((m) => {
+    mkdirSync(join(testDirectory.name, "src", m));
+  });
+  mkdirSync(join(testDirectory.name, "public"));
+  mkdirSync(join(testDirectory.name, "public", "metadata", "feature"), {
+    recursive: true,
+  });
+  writeFileSync(
+    join(
+      testDirectory.name,
+      "public",
+      "metadata",
+      "feature",
+      "somefeature.json"
+    ),
+    `{}`
   );
+  writeFileSync(
+    join(testDirectory.name, "src", "index.tsx"),
+    `import O from "./othermodule";
 
-  it("Should give us descriptive css naming for classes", (done) => {
-    writeEntryPointWithStyle("module.scss", true);
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, (_error) => {
-        const css = readFileSync(
-          join(testDirectory.name, "build", "principal.css")
-        ).toString();
-        expect(css).toMatchSnapshot();
-        done();
-      })
-    );
-  });
+    
+// +1 chunk
+import lodash from "lodash"; 
+import DOM from 'react-dom'; 
+import { useEffect } from "react"
 
-  it("Should allow importing of native nodejs builtins for web", (done) => {
-    writeEntryThatConsumesNativeStreamApi();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, (_, stats) => {
-        if (stats!.hasErrors()) console.warn(stats!.compilation.errors);
+// +1 chunk
+import * as FB from 'firebase/app';
 
-        expect(stats!.hasErrors()).toBeFalsy();
-        done();
-      })
-    );
-  });
+// import ABIGARRAY from "./averybigmodule";
 
-  it("Should decide for an existing module version if working with linked libraries", (done) => {
-    writeEntryPointWithDuplicatedDependencyBecauseOfLink();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      asyncWrapper(done, (_, stats) => {
-        const modules = stats!
-          .toJson()
-          .modules!.filter((m) => m.name?.includes("duplicated_module"));
-        expect(modules).toHaveLength(1);
-        done();
-      })
-    );
-  });
-});
+console.warn('AND CHANGED')
+setTimeout(() => {
+  O();
+  lodash.debounce(() => {
+    console.warn("Debounced")
+  }, 2000)
+  // console.warn(ABIGARRAY);
+}, 2000);
 
-describe("Bug fixing", () => {
-  it("Fix a problem where requiring an asset relative to another scss file imported from a different folder would request relative to the different folder", (done) => {
-    writeEntryWithSCSSWithRelativePath();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
-  it("Allowing compilation of typescript files, babel would crash with some syntaxes", (done) => {
-    writeEntryPointWithTSX();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
-  it("Defining a class with properties would fail the compilation", (done) => {
-    writeEntryWithSCSSWithRelativePath();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
-  it("Requiring ttf would crash the compilation", (done) => {
-    writeEntryWithSCSSWithRelativePath();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
-  it("Requiring an index.jsx from a folder would not be found", (done) => {
-    writeEntryPointWithJSX();
-    createWebpackConfiguration(testDirectory.name, "production").run(
-      createCompilerErrorHandler(done)
-    );
-  });
-});
+console.warn(DOM.render, FB, useEffect)
+DOM.render(<h1>It works</h1>, document.body)
+`
+  );
+  writeFileSync(
+    join(testDirectory.name, "src", "othermodule", "index.ts"),
+    "export default function O() {console.warn('This is another module')}"
+  );
+  //   writeFileSync(
+  //     join(testDirectory.name, "src", "averybigmodule", "index.ts"),
+  //     `const verybigArray = [${new Array(10000)
+  //       .fill(undefined)
+  //       .map((a) => Math.random())
+  //       .join(",")}];
+
+  // export default verybigArray;`
+  //   );
+  writeFileSync(
+    join(testDirectory.name, "public", "index.html"),
+    "<html><head></head><body></body></html>"
+  );
+}
+
+function readFiles(folder: string, files: string[]) {
+  const result: string[] = [];
+  files
+    .filter((a) => !a.includes(".map") && !a.includes("LICENSE"))
+    .forEach((file) => {
+      if (statSync(join(folder, file)).isDirectory())
+        result.push(
+          ...readFiles(join(folder, file), readdirSync(join(folder, file)))
+        );
+      else {
+        const filename = join(folder, file).replace(testDirectory.name, "");
+        const filesize = statSync(join(folder, file)).size;
+        // console.log(
+        //   chalk.green(`${filename} - ${filesize}`),
+        //   readFileSync(join(folder, file)).toString().slice(0, 1000)
+        // );
+        result.push(`${filename} - ${filesize}`);
+      }
+    });
+  return result;
+}
 
 /**
  * Here we shall put tests for optimizations made on the webpack compilation (svgs bundle, tree shaking, etc...)
  */
-describe("Optimizations", () => {});
+describe("Optimizations", () => {
+  describe("Build process", () => {
+    let outputDir: string;
+    beforeEach(() => {
+      if (!existsSync(tmpPath)) mkdirSync(tmpPath);
+      testDirectory = {
+        name: join(tmpPath, "fixed"),
+        removeCallback: () => {},
+      };
+
+      if (existsSync(testDirectory.name))
+        rmdirSync(testDirectory.name, {
+          recursive: true,
+        });
+      mkdirSync(testDirectory.name);
+      outputDir = join(testDirectory.name, "build");
+    });
+    it("Should copy the sources from the webpack public folder", (done) => {
+      writeExampleBuildApplication();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        (e, stats) => {
+          let error;
+          try {
+            if (e) throw e;
+            if (stats!.hasErrors())
+              throw new Error(stats!.compilation.errors.toString());
+            expect(
+              existsSync(
+                join(outputDir, "metadata", "feature", "somefeature.json")
+              )
+            ).toBeTruthy();
+          } catch (e) {
+            error = e;
+          }
+          done(error);
+        }
+      );
+    });
+    it("Should generate a single bundle when multiple modules are compiled", (done) => {
+      writeExampleBuildApplication();
+      createWebpackConfiguration(testDirectory.name, "production").run(
+        (e, stats) => {
+          let error;
+          try {
+            if (e) throw e;
+            if (stats!.hasErrors())
+              throw new Error(stats!.compilation.errors.toString());
+            const outputDir = join(testDirectory.name, "build");
+            const files = readdirSync(outputDir);
+
+            const result = readFiles(outputDir, files);
+
+            expect(result).toMatchSnapshot();
+          } catch (e) {
+            error = e;
+          }
+          done(error);
+        }
+      );
+    });
+  });
+});

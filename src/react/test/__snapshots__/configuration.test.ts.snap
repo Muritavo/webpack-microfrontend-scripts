@@ -1,7 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Basic functionality Should give us descriptive css naming for classes 1`] = `
+exports[`Base Basic functionality Should give us descriptive css naming for classes 1`] = `
 "div{background-color:blue}._1HE5XLNNENZXQ4AbFqsGYc{color:red}
 
 /*# sourceMappingURL=principal.css.map*/"
+`;
+
+exports[`Optimizations Build process Should generate a single bundle when multiple modules are compiled 1`] = `
+Array [
+  "/build/375.chunk.js - 12905",
+  "/build/589.chunk.js - 193830",
+  "/build/index.html - 91",
+  "/build/index.js - 13046",
+  "/build/main.chunk.js - 21975",
+  "/build/metadata/feature/somefeature.json - 2",
+  "/build/principal.chunk.js - 448",
+]
 `;

@@ -12,7 +12,9 @@ import { container } from "webpack";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
 import MiniCssExtractPlugin, { loader } from "mini-css-extract-plugin";
 import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
+
 const { ModuleFederationPlugin } = container;
+const CopyPlugin = require("copy-webpack-plugin");
 
 function mainCssLoader(mode: Configuration["mode"]) {
   return mode === "development" ? "style-loader" : loader;
@@ -24,13 +26,30 @@ export function createBaseConfiguration(
 ) {
   const plugins: Configuration["plugins"] = [];
   const uniqueName = baseApplicaationDirectory.replace(/[^0-9a-z]/i, "");
+  const publicFolder = join(baseApplicaationDirectory, "public");
 
   //If the project has an index.html configured
-  if (existsSync(join(baseApplicaationDirectory, "public", "index.html"))) {
+  if (existsSync(join(publicFolder, "index.html"))) {
     plugins.push(
       new HTMLPlugin({
-        template: join(baseApplicaationDirectory, "public", "index.html"),
+        template: join(publicFolder, "index.html"),
         excludeChunks: ["container"],
+      })
+    );
+  }
+
+  if (existsSync(publicFolder)) {
+    plugins.push(
+      new CopyPlugin({
+        patterns: [
+          {
+            from: join(publicFolder, "**", "*"),
+            context: "public/",
+            filter: (resourcePath: string) =>
+              !resourcePath.includes("index.html"),
+            noErrorOnMissing: true,
+          },
+        ],
       })
     );
   }
