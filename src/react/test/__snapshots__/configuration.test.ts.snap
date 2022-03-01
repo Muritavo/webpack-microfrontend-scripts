@@ -2,5 +2,6 @@
 
 exports[`Basic functionality Should give us descriptive css naming for classes 1`] = `
 "div{background-color:blue}._1HE5XLNNENZXQ4AbFqsGYc{color:red}
-"
+
+/*# sourceMappingURL=principal.css.map*/"
 `;

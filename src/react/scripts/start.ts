@@ -8,6 +8,7 @@ import { createWebpackConfiguration } from "./_webpackConfiguration";
 
 const root = resolve(getArgument("root", process.cwd()));
 const mode = "development";
+process.env.NODE_ENV = mode;
 const devServer = new DevServer(
   {
     hot: true,
@@ -16,7 +17,7 @@ const devServer = new DevServer(
       progress: false,
     },
     historyApiFallback: {
-      index: '/'
+      index: "/",
     },
     headers: {
       "Access-Control-Allow-Origin": "*",

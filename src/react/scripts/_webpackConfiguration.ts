@@ -99,6 +99,7 @@ export function createBaseConfiguration(
       publicPath: `/`,
       libraryTarget: "system",
     },
+    devtool: "source-map",
     node: {
       global: true,
     },
@@ -128,6 +129,9 @@ export function createBaseConfiguration(
                   require.resolve("react-refresh/babel"),
                 require.resolve("@babel/plugin-proposal-class-properties"),
                 require.resolve("@babel/plugin-transform-runtime"),
+                require.resolve(
+                  "../../shared/babel-plugins/environment-usage-plugin"
+                ),
               ].filter(Boolean),
             },
           },

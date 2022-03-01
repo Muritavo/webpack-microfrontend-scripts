@@ -6,6 +6,8 @@ import { createWebpackConfiguration } from './_webpackConfiguration';
 
 const root = resolve(getArgument("root", process.env.INIT_CWD!));
 const mode = "production";
+process.env.NODE_ENV = mode;
+
 
 createWebpackConfiguration(root, mode).run((error, stats) => {
     if (error) {
