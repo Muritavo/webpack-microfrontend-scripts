@@ -13,7 +13,10 @@ import {
 import { join } from "path";
 import { DirResult, dirSync } from "tmp";
 import { Stats } from "webpack";
-import { createWebpackConfiguration } from "../scripts/_webpackConfiguration";
+import {
+  createBaseConfiguration,
+  createWebpackConfiguration,
+} from "../scripts/_webpackConfiguration";
 let testDirectory: DirResult;
 const tmpPath = join(__dirname, "tmp");
 
@@ -608,6 +611,14 @@ describe("Base", () => {
       createWebpackConfiguration(testDirectory.name, "production").run(
         createCompilerErrorHandler(done)
       );
+    });
+  });
+
+  describe("Checks", () => {
+    it("Should initialize correctly the native polyfilled urls", () => {
+      const config = createBaseConfiguration(testDirectory.name, "development");
+  
+      expect(config.resolve!.fallback).toMatchSnapshot();
     });
   });
 });

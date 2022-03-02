@@ -230,16 +230,12 @@ export function createBaseConfiguration(
       ],
       fallback: {
         stream: require.resolve("stream-browserify"),
-        buffer: require.resolve("buffer"),
+        buffer: require.resolve("buffer/index"),
         crypto: require.resolve("crypto-browserify"),
         http: require.resolve("stream-http"),
-        url: require.resolve(
-          join(__dirname, "..", "..", "..", "node_modules", "url")
-        ),
+        url: require.resolve("url/url"),
         https: require.resolve("https-browserify"),
-        assert: require.resolve(
-          join(__dirname, "..", "..", "..", "node_modules", "assert")
-        ),
+        assert: require.resolve("assert/build/assert"),
         os: require.resolve("os-browserify/browser"),
       },
     },

@@ -6,6 +6,19 @@ exports[`Base Basic functionality Should give us descriptive css naming for clas
 /*# sourceMappingURL=principal.css.map*/"
 `;
 
+exports[`Base Checks Should initialize correctly the native polyfilled urls 1`] = `
+Object {
+  "assert": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/assert/build/assert.js",
+  "buffer": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/buffer/index.js",
+  "crypto": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/crypto-browserify/index.js",
+  "http": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/stream-http/index.js",
+  "https": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/https-browserify/index.js",
+  "os": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/os-browserify/browser.js",
+  "stream": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/stream-browserify/index.js",
+  "url": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/url/url.js",
+}
+`;
+
 exports[`Optimizations Build process Should generate a single bundle when multiple modules are compiled 1`] = `
 Array [
   "/build/375.chunk.js - 12905",
