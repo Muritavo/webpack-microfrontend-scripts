@@ -10,14 +10,14 @@ import { existsSync } from "fs";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { container } from "webpack";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
-import MiniCssExtractPlugin, { loader } from "mini-css-extract-plugin";
+import MiniCssExtractPlugin, { loader as minicssloader } from "mini-css-extract-plugin";
 import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
 
 const { ModuleFederationPlugin } = container;
 const CopyPlugin = require("copy-webpack-plugin");
 
 function mainCssLoader(mode: Configuration["mode"]) {
-  return mode === "development" ? "style-loader" : loader;
+  return mode === "development" ? "style-loader" : minicssloader;
 }
 
 export function createBaseConfiguration(
@@ -229,6 +229,8 @@ export function createBaseConfiguration(
         join(baseApplicaationDirectory, "node_modules"),
       ],
       fallback: {
+        fs: false,
+        zlib: false,
         stream: require.resolve("stream-browserify"),
         buffer: require.resolve("buffer/index"),
         crypto: require.resolve("crypto-browserify"),
