@@ -15,3 +15,8 @@ declare module "*.png" {
   const S: string;
   export default S;
 }
+
+declare module "*.jpeg" {
+  const S: string;
+  export default S;
+}
