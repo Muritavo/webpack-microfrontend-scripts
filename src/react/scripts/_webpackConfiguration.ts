@@ -10,7 +10,9 @@ import { existsSync } from "fs";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { container } from "webpack";
 import { TsconfigPathsPlugin } from "tsconfig-paths-webpack-plugin";
-import MiniCssExtractPlugin, { loader as minicssloader } from "mini-css-extract-plugin";
+import MiniCssExtractPlugin, {
+  loader as minicssloader,
+} from "mini-css-extract-plugin";
 import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
 
 const { ModuleFederationPlugin } = container;
@@ -68,6 +70,11 @@ export function createBaseConfiguration(
   }
 
   plugins.push(
+    {
+      apply(c) {
+        c.hooks.afterCompile.tap("Logger", (comp) => {});
+      },
+    },
     new ModuleFederationPlugin({
       //This will create a container
       name: "container",
@@ -205,10 +212,15 @@ export function createBaseConfiguration(
           },
         },
         {
-          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg)$/i,
+          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg|mp4)$/i,
           loader: "file-loader",
           options: {
             name: "[path][name].[ext]",
+            publicPath: (url: string, _: any, context: any) => {
+              if (baseConfig.output?.publicPath)
+                return `${baseConfig.output?.publicPath || "/"}${url}`;
+              else return url;
+            },
           },
         },
       ],

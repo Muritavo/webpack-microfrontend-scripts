@@ -54,9 +54,7 @@ const LibraryVersionOptimizerPlugin: Plugin = {
                   },
                 ],
               };
-            const preloadedLib = versionMap[req.request!].versions.find(
-              (a) => a.version === data.version
-            );
+            const preloadedLib = versionMap[req.request!].versions[0];
             if (preloadedLib) {
               req.path = preloadedLib.baseContext;
             } else {

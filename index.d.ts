@@ -20,3 +20,9 @@ declare module "*.jpeg" {
   const S: string;
   export default S;
 }
+
+
+declare module "*.mp4" {
+  const S: string;
+  export default S;
+}
