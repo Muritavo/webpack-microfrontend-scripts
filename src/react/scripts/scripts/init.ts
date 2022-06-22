@@ -17,7 +17,7 @@ delete (window as any)[$RefreshInjected$];
 System.import("/index.js")
   .then((m: any) => {
     try {
-      m.init(__webpack_share_scopes__.default);
+      m.init(__webpack_share_scopes__.default || {});
     } catch (e) {}
     return m.get("entry");
   })
