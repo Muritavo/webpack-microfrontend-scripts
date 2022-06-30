@@ -228,6 +228,7 @@ export function createBaseConfiguration(
     resolve: {
       plugins: [
         new TsconfigPathsPlugin({
+          configFile: join(baseApplicaationDirectory, "tsconfig.json"),
           extensions: [".ts", ".tsx", ".js"],
           logInfoToStdOut: false,
           silent: true,
@@ -242,7 +243,7 @@ export function createBaseConfiguration(
       ],
       fallback: {
         fs: false,
-        zlib: false,
+        zlib: require.resolve("browserify-zlib"),
         stream: require.resolve("stream-browserify"),
         buffer: require.resolve("buffer/index"),
         crypto: require.resolve("crypto-browserify"),
