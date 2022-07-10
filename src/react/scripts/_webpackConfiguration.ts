@@ -251,6 +251,7 @@ export function createBaseConfiguration(
         https: require.resolve("https-browserify"),
         assert: require.resolve("assert/build/assert"),
         os: require.resolve("os-browserify/browser"),
+        path: require.resolve("path-browserify")
       },
     },
     entry: {
