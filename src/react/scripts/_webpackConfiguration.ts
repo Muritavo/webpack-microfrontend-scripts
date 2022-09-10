@@ -5,7 +5,7 @@ import Webpack, {
   ProvidePlugin,
 } from "webpack";
 import HTMLPlugin from "html-webpack-plugin";
-import { join } from "path";
+import { join, relative } from "path";
 import { existsSync } from "fs";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import { container } from "webpack";
@@ -14,17 +14,30 @@ import MiniCssExtractPlugin, {
   loader as minicssloader,
 } from "mini-css-extract-plugin";
 import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
+import chalk from "chalk";
+
+type ConfirationModes = Configuration["mode"] | "test"
 
 const { ModuleFederationPlugin } = container;
 const CopyPlugin = require("copy-webpack-plugin");
 
-function mainCssLoader(mode: Configuration["mode"]) {
-  return mode === "development" ? "style-loader" : minicssloader;
+function mainCssLoader(mode: ConfirationModes) {
+  return mode !== "production" ? "style-loader" : minicssloader;
+}
+
+function setupTsConfigPathsPlugin(tsconfigPath: string) {
+  if (!existsSync(tsconfigPath)) return;
+  return new TsconfigPathsPlugin({
+    configFile: tsconfigPath,
+    extensions: [".ts", ".tsx", ".js"],
+    logInfoToStdOut: false,
+    silent: true,
+  })
 }
 
 export function createBaseConfiguration(
   baseApplicaationDirectory: string,
-  mode: Configuration["mode"]
+  mode: ConfirationModes
 ) {
   const plugins: Configuration["plugins"] = [];
   const uniqueName = baseApplicaationDirectory.replace(/[^0-9a-z]/i, "");
@@ -56,26 +69,26 @@ export function createBaseConfiguration(
     );
   }
 
+
+  let libraryTarget!: NonNullable<Configuration['output']>['libraryTarget'];
+
   if (mode === "development") {
     plugins.push(
       new ReactRefreshWebpackPlugin({
         library: uniqueName,
       })
     );
-    plugins.push(new SourceMapDevToolPlugin({}));
   }
+
+  if (mode !== "production")
+    plugins.push(new SourceMapDevToolPlugin({}));
 
   if (mode === "production") {
     plugins.push(new MiniCssExtractPlugin());
   }
 
-  plugins.push(
-    {
-      apply(c) {
-        c.hooks.afterCompile.tap("Logger", (comp) => {});
-      },
-    },
-    new ModuleFederationPlugin({
+  if (mode !== "test") {
+    plugins.push(new ModuleFederationPlugin({
       //This will create a container
       name: "container",
       //Accessible via the index.js file
@@ -105,25 +118,36 @@ export function createBaseConfiguration(
         },
         "firebase/app",
       ],
-    }),
+    }))
+    libraryTarget = "system"
+  } else {
+    libraryTarget = "umd"
+  }
+
+  plugins.push(
+    {
+      apply(c) {
+        c.hooks.afterCompile.tap("Logger", (comp) => { });
+      },
+    },
     new DefinePlugin({
       "process.env": {},
     }),
     new ProvidePlugin({
-      Buffer: ["buffer", "Buffer"],
+      'window.Buffer': ["buffer", "Buffer"],
       process: "process/browser",
     })
   );
 
   const baseConfig: Configuration = {
-    mode,
+    mode: mode === "production" ? mode : "development",
     context: baseApplicaationDirectory,
     output: {
       //Let's write to the build directory as react already does
       path: join(baseApplicaationDirectory, "build"),
       filename: "[name].chunk.js",
       publicPath: `/`,
-      libraryTarget: "system",
+      libraryTarget,
     },
     devtool: "source-map",
     node: {
@@ -152,7 +176,7 @@ export function createBaseConfiguration(
               sourceType: "unambiguous",
               plugins: [
                 mode === "development" &&
-                  require.resolve("react-refresh/babel"),
+                require.resolve("react-refresh/babel"),
                 require.resolve("@babel/plugin-proposal-class-properties"),
                 require.resolve("@babel/plugin-transform-runtime"),
                 require.resolve(
@@ -212,29 +236,39 @@ export function createBaseConfiguration(
           },
         },
         {
-          test: /\.(png|jpe?g|gif|pdf|ttf|otf|svg|mp4)$/i,
+          test: /\.(png|jpe?g|gif|pdf|ttf|otf|mp4)$/i,
           loader: "file-loader",
           options: {
             name: "[path][name].[ext]",
-            publicPath: (url: string, _: any, context: any) => {
+            publicPath: (url: string) => {
               if (baseConfig.output?.publicPath)
                 return `${baseConfig.output?.publicPath || "/"}${url}`;
               else return url;
             },
           },
         },
+        {
+          test: /\.(svg)$/i,
+          loader: "file-loader",
+          options: {
+            name: "[path][name].[ext]",
+            publicPath: (url: string) => {
+              if (baseConfig.output?.publicPath)
+                return `${baseConfig.output?.publicPath || "/"}${url}`;
+              else return url;
+            },
+          },
+          issuer: {
+            and: [/\.(s?css)$/],
+          },
+        },
       ],
     },
     resolve: {
       plugins: [
-        new TsconfigPathsPlugin({
-          configFile: join(baseApplicaationDirectory, "tsconfig.json"),
-          extensions: [".ts", ".tsx", ".js"],
-          logInfoToStdOut: false,
-          silent: true,
-        }),
+        setupTsConfigPathsPlugin(join(baseApplicaationDirectory, "tsconfig.json")),
         LibraryVersionOptimizerPlugin,
-      ],
+      ].filter(Boolean) as any[],
       extensions: [".ts", ".tsx", ".js", ".json", ".wasm", ".jsx"],
       modules: [
         join(baseApplicaationDirectory, "src"),
@@ -255,15 +289,7 @@ export function createBaseConfiguration(
         path: require.resolve("path-browserify")
       },
     },
-    entry: {
-      main: {
-        import: [require.resolve("./scripts/init")],
-        library: {
-          type: "umd",
-        },
-      },
-      container: require.resolve("systemjs-webpack-interop/auto-public-path"),
-    },
+    entry: {},
     plugins,
     stats: "none",
     infrastructureLogging: {
@@ -271,12 +297,23 @@ export function createBaseConfiguration(
     },
   };
 
+  if (mode !== "test") {
+    const entry = (baseConfig.entry! as Webpack.EntryObject)
+    entry.container = require.resolve("systemjs-webpack-interop/auto-public-path")
+    entry.main = {
+      import: [require.resolve("./scripts/init")],
+      library: {
+        type: "umd",
+      },
+    }
+  }
+
   return loadCustomizer(baseApplicaationDirectory)(baseConfig);
 }
 
 export function createWebpackConfiguration(
   baseApplicaationDirectory: string,
-  mode: Configuration["mode"]
+  mode: ConfirationModes
 ) {
   return Webpack(createBaseConfiguration(baseApplicaationDirectory, mode));
 }
@@ -284,9 +321,11 @@ export function createWebpackConfiguration(
 function loadCustomizer(
   baseDir: string
 ): (config: Configuration) => Configuration {
+  const customizerPath = join(baseDir, "custom-config.js")
   try {
-    return require(join(baseDir, "custom-config.js")).webpack;
+    return require(customizerPath).webpack;
   } catch (e) {
+    console.log(`\n\nTo customize webpack config, create a module at ${chalk.white(`./${relative(process.env.INIT_CWD!, join(baseDir, "custom-config.js"))}`)}\n\n`)
     return (c) => c;
   }
 }
