@@ -8,6 +8,11 @@ const versionMap: {
     }[];
   };
 } = {};
+
+function getMajor(version: string = "") {
+  return Number(version.split(".")[0]);
+}
+
 /**
  * This plugin allows for single resolving of same version modules
  *
@@ -54,7 +59,7 @@ const LibraryVersionOptimizerPlugin: Plugin = {
                   },
                 ],
               };
-            const preloadedLib = versionMap[req.request!].versions[0];
+            const preloadedLib = versionMap[req.request!].versions.find(a => (getMajor(a.version) === getMajor(data.version)));
             if (preloadedLib) {
               req.path = preloadedLib.baseContext;
             } else {

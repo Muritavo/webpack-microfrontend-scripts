@@ -3,6 +3,7 @@ require("systemjs/dist/system.min.js");
 declare var System: any;
 declare var __react_refresh_library__: any;
 declare var __webpack_share_scopes__: any;
+declare var __webpack_public_path__: string;
 
 var $RefreshInjected$ = "__reactRefreshInjected";
 // Namespace the injected flag (if necessary) for monorepo compatibility
@@ -14,11 +15,11 @@ if (
 }
 delete (window as any)[$RefreshInjected$];
 
-System.import("/index.js")
+System.import(__webpack_public_path__ + "index.js")
   .then((m: any) => {
     try {
       m.init(__webpack_share_scopes__.default || {});
-    } catch (e) {}
+    } catch (e) { }
     return m.get("entry");
   })
   .then((m: any) => m());

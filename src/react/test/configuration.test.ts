@@ -1,3 +1,4 @@
+import { execSync } from "child_process";
 import {
   existsSync,
   mkdirSync,
@@ -21,9 +22,9 @@ let testDirectory: DirResult;
 const tmpPath = join(__dirname, "tmp");
 
 afterAll(() => {
-  rmdirSync(tmpPath, {
-    recursive: true,
-  });
+  // rmdirSync(tmpPath, {
+  //   recursive: true,
+  // });
 });
 
 function createAsyncCb(): Promise<any> & {
@@ -211,25 +212,22 @@ function writeEntryPointWithStyle(
   writeFileSync(
     join(testDirectory.name, "src", `styles.${styleType}`),
     `
-        ${
-          styleType === "css" || styleType === "module.css"
-            ? ""
-            : "$someVar: blue;"
-        }
+        ${styleType === "css" || styleType === "module.css"
+      ? ""
+      : "$someVar: blue;"
+    }
         div {
-            background-color: ${
-              styleType === "css" || styleType === "module.css"
-                ? "blue"
-                : "$someVar"
-            };
+            background-color: ${styleType === "css" || styleType === "module.css"
+      ? "blue"
+      : "$someVar"
+    };
         }
-        ${
-          multiclass
-            ? `
+        ${multiclass
+      ? `
 .someExample { color: red; }        
 `
-            : ""
-        }`
+      : ""
+    }`
   );
   writeFileSync(
     join(testDirectory.name, "src", "component.tsx"),
@@ -343,7 +341,10 @@ function writeLibrary(path: string) {
   );
 }
 function writeEntryPointWithDuplicatedDependencyBecauseOfLink() {
-  writeLibrary("node_modules");
+  writeLibrary(join(
+    testDirectory.name,
+    "node_modules",
+  ));
   const dpeendencyModulePath = join(
     testDirectory.name,
     "node_modules",
@@ -378,6 +379,17 @@ import anotherFunc from "duplicated_module";
 console.warn("fechou" + someFunc() + anotherFunc())`
   );
 }
+function writeEntryPointWithDuplicatedDependencyRealCenario() {
+  const srcDir = join(testDirectory.name, "src");
+  if (!existsSync(srcDir)) mkdirSync(srcDir);
+  writeFileSync(
+    join(srcDir, "index.js"),
+    `import { useLocation } from "react-router-dom";
+import { useHistory } from "@onepercentio/one-ui/dist/hooks/useCustomHistory";
+  
+console.warn(useHistory, useLocation)`
+  );
+}
 
 function writeEntryThatConsumesNativeStreamApi() {
   const srcDir = join(testDirectory.name, "src");
@@ -395,11 +407,11 @@ describe("Base", () => {
     });
   });
 
-  afterEach(() => {
-    rmdirSync(testDirectory.name, {
-      recursive: true,
-    });
-  });
+  // afterEach(() => {
+  //   rmdirSync(testDirectory.name, {
+  //     recursive: true,
+  //   });
+  // });
 
   describe("Basic functionality", () => {
     it("Should compile when the folder has a src/index.ts entrypoint", (done) => {
@@ -568,12 +580,18 @@ describe("Base", () => {
     });
 
     it("Should decide for an existing module version if working with linked libraries", (done) => {
-      writeEntryPointWithDuplicatedDependencyBecauseOfLink();
+      // writeEntryPointWithDuplicatedDependencyBecauseOfLink();
+      writeEntryPointWithDuplicatedDependencyRealCenario();
+      const result = execSync('yarn link @onepercentio/one-ui', {
+        stdio: "inherit",
+        cwd: testDirectory.name
+      })
       createWebpackConfiguration(testDirectory.name, "production").run(
         asyncWrapper(done, (_, stats) => {
+          console.warn(stats?.hasErrors(), stats?.compilation.errors[0])
           const modules = stats!
             .toJson()
-            .modules!.filter((m) => m.name?.includes("duplicated_module"));
+            .modules!.filter((m) => m.name?.includes("react-router-dom"));
           expect(modules).toHaveLength(1);
           done();
         })
@@ -617,7 +635,7 @@ describe("Base", () => {
   describe("Checks", () => {
     it("Should initialize correctly the native polyfilled urls", () => {
       const config = createBaseConfiguration(testDirectory.name, "development");
-  
+
       expect(config.resolve!.fallback).toMatchSnapshot();
     });
   });
@@ -721,7 +739,7 @@ describe("Optimizations", () => {
       if (!existsSync(tmpPath)) mkdirSync(tmpPath);
       testDirectory = {
         name: join(tmpPath, "fixed"),
-        removeCallback: () => {},
+        removeCallback: () => { },
       };
 
       if (existsSync(testDirectory.name))
