@@ -183,6 +183,7 @@ export function createBaseConfiguration(
                 require.resolve(
                   "../../shared/babel-plugins/environment-usage-plugin"
                 ),
+                mode === "test" && "istanbul"
               ].filter(Boolean),
             },
           },
@@ -280,7 +281,7 @@ export function createBaseConfiguration(
         fs: false,
         zlib: require.resolve("browserify-zlib"),
         stream: require.resolve("stream-browserify"),
-        buffer: require.resolve("buffer/index"),
+        buffer: require.resolve("buffer"),
         crypto: require.resolve("crypto-browserify"),
         http: require.resolve("stream-http"),
         url: require.resolve("url/url"),
