@@ -135,6 +135,7 @@ export function createBaseConfiguration(
     }),
     new ProvidePlugin({
       'window.Buffer': ["buffer", "Buffer"],
+      'Buffer': ["buffer", "Buffer"],
       process: "process/browser",
     })
   );
