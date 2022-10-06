@@ -22,7 +22,7 @@ const { ModuleFederationPlugin } = container;
 const CopyPlugin = require("copy-webpack-plugin");
 
 function mainCssLoader(mode: ConfirationModes) {
-  return mode !== "production" ? "style-loader" : minicssloader;
+  return mode !== "production" ? require.resolve("style-loader") : minicssloader;
 }
 
 function setupTsConfigPathsPlugin(tsconfigPath: string) {
