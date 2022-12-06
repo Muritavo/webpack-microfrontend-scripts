@@ -50,6 +50,9 @@ const LibraryVersionOptimizerPlugin: Plugin = {
             const data = resolved.descriptionFileData! as {
               version: string;
             };
+
+            if (req.request?.includes("react-router-dom"))
+            console.log(req.request, versionMap[req.request], data)
             if (!versionMap[req.request!])
               versionMap[req.request!] = {
                 versions: [

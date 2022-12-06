@@ -9,13 +9,16 @@ exports[`Base Basic functionality Should give us descriptive css naming for clas
 exports[`Base Checks Should initialize correctly the native polyfilled urls 1`] = `
 Object {
   "assert": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/assert/build/assert.js",
-  "buffer": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/buffer/index.js",
+  "buffer": "buffer",
   "crypto": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/crypto-browserify/index.js",
+  "fs": false,
   "http": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/stream-http/index.js",
   "https": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/https-browserify/index.js",
   "os": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/os-browserify/browser.js",
+  "path": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/path-browserify/index.js",
   "stream": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/stream-browserify/index.js",
   "url": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/url/url.js",
+  "zlib": "/Users/muriloaraujo/Projetos/Muritavo/webpack-microfrontend-scripts/node_modules/browserify-zlib/lib/index.js",
 }
 `;
 
@@ -25,7 +28,7 @@ Array [
   "/build/589.chunk.js - 193830",
   "/build/index.html - 91",
   "/build/index.js - 13046",
-  "/build/main.chunk.js - 21975",
+  "/build/main.chunk.js - 22005",
   "/build/metadata/feature/somefeature.json - 2",
   "/build/principal.chunk.js - 448",
 ]
