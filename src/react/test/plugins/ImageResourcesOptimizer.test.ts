@@ -40,7 +40,7 @@ function writeEntryWithComp(compSrc: string) {
   );
 }
 
-it("Should be able to create multiple versions of an image", (done) => {
+it.only("Should be able to create multiple versions of an image", (done) => {
   writeEntryWithComp(`import pngPath, { Scaled as ScaledPNG } from './assets/example.png';
   import jpgPath, { Scaled as ScaledJPG } from './assets/example_jpg.jpg';
   
@@ -93,7 +93,7 @@ it("Should be able to create multiple versions of an image", (done) => {
   );
 });
 
-it.only("Should create a component with scaling prop", (done) => {
+it("Should create a component with scaling prop", (done) => {
   writeEntryWithComp(`import { ReactComponent } from './assets/example_svg.svg';
 import {useState} from "react";
   
@@ -172,6 +172,44 @@ import {useState} from "react";
   );
 });
 
-describe("BUGFIX", () => {
+it("Should be able to indicate that the image will not require a resolution bigger than X", (done) => {
+  writeEntryWithComp(`import jpgPath, {Scaled as ScaledJPG} from './assets/example_jpg.jpg?w=500';
+import {useState} from "react";
+  
+  export function Component() { 
+    const [scale, setScale] = useState<string>("0.5x");
+    console.log(scale)
+  return <>
+    <style dangerouslySetInnerHTML={{__html: "img { width: 90vw }"}}/>
+    <h1>PNG</h1>
+    <h2>Original</h2>
+    <img src={pngPath}/>
+    <h2>Small</h2>
+    <img src={ScaledJPG['0.5x']}/>
+    <h2>Normal</h2>
+    <img src={ScaledJPG['1x']}/>
+    <h2>Big</h2>
+    <img src={ScaledJPG['2x']}/>
+    <h2>Large</h2>
+    <img src={ScaledJPG['3x']}/>
+    <h2>ExtraLarge</h2>
+    <img src={ScaledJPG['4x']}/>
+  </>
+  }`);
+  createWebpackConfiguration(testDirectory.name, "production").run(
+    createCompilerErrorHandler(((error: any) => {
+      if (error) return done(error);
+      try {
+        const imageResources = readdirSync(
+          join(testDirectory.name, "build", "src", "assets")
+        );
+        expect(imageResources).toHaveLength(2);
+        done();
+      } catch (e) {
+        done(e);
+      }
+    }) as any)
+  );
+});
 
-})
+describe("BUGFIX", () => {});

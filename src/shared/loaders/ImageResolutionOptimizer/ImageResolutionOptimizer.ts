@@ -1,5 +1,5 @@
 import { LoaderContext } from "webpack";
-import { getOptions, interpolateName } from "loader-utils";
+import { getOptions, interpolateName, getCurrentRequest } from "loader-utils";
 import path, { parse } from "path";
 import Sharp from "sharp";
 const { JSDOM } = require("jsdom");
@@ -44,6 +44,7 @@ async function createVariations(
   customName?: CustomNameFactory
 ) {
   const meta = await baseImage.metadata();
+  console.log(meta.width);
   const BASE_SIZES = [
     [3840, "4x"],
     [1920, "3x"],
@@ -83,8 +84,15 @@ export async function urlBasedImageResolutionOptimizer(
     publicPath: (url: string) => string;
   }>
 ) {
+  const request = new URLSearchParams(this.resourceQuery);
   try {
-    const baseImage = Sharp(this.resourcePath);
+    let baseImage = Sharp(this.resourcePath);
+    if (request.get("w")) {
+      console.log("Resizing image to", request.get("w"));
+      baseImage = Sharp(
+        await baseImage.resize(Number(request.get("w"))).toBuffer()
+      );
+    }
     const { _0_5x, _1x, _2x, _3x, _4x, original } = await createVariations.call(
       this,
       baseImage
