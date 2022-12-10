@@ -4,9 +4,44 @@ import path, { parse } from "path";
 import Sharp from "sharp";
 const { JSDOM } = require("jsdom");
 
+enum ImageScales {
+  SMALL = "0.5x",
+  NORMAL = "1x",
+  BIG = "2x",
+  LARGE = "3x",
+  EXTRA_LARGE = "4x",
+}
+
 const BASE_64_SECTION_SPLITTER = /data:image\/([a-z]+);base64,(.+)/;
+const BASE_SIZES = [
+  [3840, "4x"],
+  [1920, "3x"],
+  [1280, "2x"],
+  [800, "1x"],
+  [480, "0.5x"],
+] as const;
 
 type CustomNameFactory = (suffix: string) => string;
+
+async function emitFile(
+  this: LoaderContext<{
+    publicPath: (url: string) => string;
+  }>,
+  content: string | Buffer,
+  suffix: string,
+  customName: CustomNameFactory = (suffix) => `[path][name]${suffix}.[ext]`
+) {
+  const url = interpolateName(this as any, customName(suffix), {
+    context: this.rootContext,
+    content,
+  });
+  this.emitFile(url, content, null as any, {
+    immutable: true,
+    sourceFilename: path.relative(this.rootContext, this.resourcePath),
+  });
+
+  return url;
+}
 
 async function resize(
   this: LoaderContext<{
@@ -20,14 +55,7 @@ async function resize(
   const options = getOptions(this as any) as any;
   if (suffix) suffix = "_" + suffix;
   const content = await baseImage.resize(width).toBuffer();
-  const url = interpolateName(this as any, customName(suffix), {
-    context: this.rootContext,
-    content,
-  });
-  this.emitFile(url, content, null as any, {
-    immutable: true,
-    sourceFilename: path.relative(this.rootContext, this.resourcePath),
-  });
+  const url = emitFile.call(this, content, suffix, customName);
   let publicPath = `__webpack_public_path__ + ${JSON.stringify(url)}`;
   if (options.publicPath) {
     publicPath = options.publicPath(url);
@@ -44,14 +72,7 @@ async function createVariations(
   customName?: CustomNameFactory
 ) {
   const meta = await baseImage.metadata();
-  console.log(meta.width);
-  const BASE_SIZES = [
-    [3840, "4x"],
-    [1920, "3x"],
-    [1280, "2x"],
-    [800, "1x"],
-    [480, "0.5x"],
-  ] as const;
+
   const OriginalSrc = await resize.call(
     this,
     baseImage,
@@ -88,7 +109,6 @@ export async function urlBasedImageResolutionOptimizer(
   try {
     let baseImage = Sharp(this.resourcePath);
     if (request.get("w")) {
-      console.log("Resizing image to", request.get("w"));
       baseImage = Sharp(
         await baseImage.resize(Number(request.get("w"))).toBuffer()
       );
@@ -171,6 +191,8 @@ export async function extractImageResources(
   const parsedXml = parser.parseFromString(r, "text/xml");
   const images = Array.from(parsedXml.querySelectorAll("image"));
 
+  const baseImages: [sharp: ReturnType<typeof Sharp>, ext: string][] = [];
+
   for (let image of images) {
     const imgSrc = image.getAttribute("xlink:href");
     if (imgSrc) {
@@ -182,12 +204,12 @@ export async function extractImageResources(
         const [_original, ext, src] = sections;
         try {
           const imageSharp = Sharp(Buffer.from(src, "base64"));
+          baseImages.push([imageSharp, extension]);
           const resources = await createVariations.call(
             this,
             imageSharp,
             (suffix) => `[path][name]/${images.indexOf(image)}${suffix}.${ext}`
           );
-          image.setAttribute("xlink:href", `##SVG_${imageResources.length}##`);
           imageResources.push({
             ...resources,
             size: imgSrc.length,
@@ -198,6 +220,31 @@ export async function extractImageResources(
         }
       }
     }
+  }
+  
+  await emitFile.call(this, parsedXml.documentElement.outerHTML, "");
+
+  for (let res of Object.values(ImageScales)) {
+    const resInfo = BASE_SIZES.find(([_, enumVal]) => enumVal === res)!;
+    for (let image of images) {
+      const imageInfo = baseImages[images.indexOf(image)];
+      const meta = await imageInfo[0].metadata();
+      const resized =
+        meta.width! < resInfo[0]
+          ? imageInfo[0]
+          : imageInfo[0].resize(resInfo[0]);
+      image.setAttribute(
+        "xlink:href",
+        `data:image/${imageInfo[1]};base64,${(
+          await resized.toBuffer()
+        ).toString("base64")}`
+      );
+    }
+    await emitFile.call(
+      this,
+      parsedXml.documentElement.outerHTML,
+      "_" + resInfo[1]
+    );
   }
 
   return parsedXml.documentElement.outerHTML;

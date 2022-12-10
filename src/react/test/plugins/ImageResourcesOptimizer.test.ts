@@ -40,7 +40,7 @@ function writeEntryWithComp(compSrc: string) {
   );
 }
 
-it.only("Should be able to create multiple versions of an image", (done) => {
+it("Should be able to create multiple versions of an image", (done) => {
   writeEntryWithComp(`import pngPath, { Scaled as ScaledPNG } from './assets/example.png';
   import jpgPath, { Scaled as ScaledJPG } from './assets/example_jpg.jpg';
   
@@ -93,8 +93,8 @@ it.only("Should be able to create multiple versions of an image", (done) => {
   );
 });
 
-it("Should create a component with scaling prop", (done) => {
-  writeEntryWithComp(`import { ReactComponent } from './assets/example_svg.svg';
+it.only("Should create a component with scaling prop", (done) => {
+  writeEntryWithComp(`import pathBasedSVG, { ReactComponent } from './assets/example_svg.svg';
 import {useState} from "react";
   
   export function Component() { 
@@ -102,6 +102,8 @@ import {useState} from "react";
     console.log(scale)
   return <>
     <style dangerouslySetInnerHTML={{__html: "svg { width: 400px }"}}/>
+    <h1>PATH BASED</h1>
+    <img src={pathBasedSVG} width="500"/>
     <h1>PNG</h1>
     <div>
       <button onClick={() => setScale("")}>Original</button>
