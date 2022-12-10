@@ -16,13 +16,15 @@ import MiniCssExtractPlugin, {
 import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
 import chalk from "chalk";
 
-type ConfirationModes = Configuration["mode"] | "test"
+type ConfirationModes = Configuration["mode"] | "test";
 
 const { ModuleFederationPlugin } = container;
 const CopyPlugin = require("copy-webpack-plugin");
 
 function mainCssLoader(mode: ConfirationModes) {
-  return mode !== "production" ? require.resolve("style-loader") : minicssloader;
+  return mode !== "production"
+    ? require.resolve("style-loader")
+    : minicssloader;
 }
 
 function setupTsConfigPathsPlugin(tsconfigPath: string) {
@@ -32,7 +34,7 @@ function setupTsConfigPathsPlugin(tsconfigPath: string) {
     extensions: [".ts", ".tsx", ".js"],
     logInfoToStdOut: false,
     silent: true,
-  })
+  });
 }
 
 export function createBaseConfiguration(
@@ -69,8 +71,7 @@ export function createBaseConfiguration(
     );
   }
 
-
-  let libraryTarget!: NonNullable<Configuration['output']>['libraryTarget'];
+  let libraryTarget!: NonNullable<Configuration["output"]>["libraryTarget"];
 
   if (mode === "development") {
     plugins.push(
@@ -80,62 +81,63 @@ export function createBaseConfiguration(
     );
   }
 
-  if (mode !== "production")
-    plugins.push(new SourceMapDevToolPlugin({}));
+  if (mode !== "production") plugins.push(new SourceMapDevToolPlugin({}));
 
   if (mode === "production") {
     plugins.push(new MiniCssExtractPlugin());
   }
 
   if (mode !== "test") {
-    plugins.push(new ModuleFederationPlugin({
-      //This will create a container
-      name: "container",
-      //Accessible via the index.js file
-      filename: "index.js",
-      //And wrapped on a systemjs format
-      library: { type: "system" },
-      //This exposes a simple module for the entrypoint
-      exposes: {
-        entry: {
-          import: ["./src/index"],
-          name: "principal",
-        },
-      },
-      //This means react should be shared
-      shared: [
-        {
-          react: {
-            eager: true,
-            singleton: true,
-            requiredVersion: false,
-          },
-          "react-refresh/runtime": {
-            eager: true,
-            singleton: true,
-            requiredVersion: false,
+    plugins.push(
+      new ModuleFederationPlugin({
+        //This will create a container
+        name: "container",
+        //Accessible via the index.js file
+        filename: "index.js",
+        //And wrapped on a systemjs format
+        library: { type: "system" },
+        //This exposes a simple module for the entrypoint
+        exposes: {
+          entry: {
+            import: ["./src/index"],
+            name: "principal",
           },
         },
-        "firebase/app",
-      ],
-    }))
-    libraryTarget = "system"
+        //This means react should be shared
+        shared: [
+          {
+            react: {
+              eager: true,
+              singleton: true,
+              requiredVersion: false,
+            },
+            "react-refresh/runtime": {
+              eager: true,
+              singleton: true,
+              requiredVersion: false,
+            },
+          },
+          "firebase/app",
+        ],
+      })
+    );
+    libraryTarget = "system";
   } else {
-    libraryTarget = "umd"
+    libraryTarget = "umd";
   }
 
   plugins.push(
     {
       apply(c) {
-        c.hooks.afterCompile.tap("Logger", (comp) => { });
+        c.hooks.afterCompile.tap("Logger", (comp) => {});
       },
     },
     new DefinePlugin({
       "process.env": {},
     }),
     new ProvidePlugin({
-      'window.Buffer': ["buffer", "Buffer"],
-      'Buffer': ["buffer", "Buffer"],
+      "window.Buffer": ["buffer", "Buffer"],
+      Buffer: ["buffer", "Buffer"],
       process: "process/browser",
     })
   );
@@ -177,13 +179,13 @@ export function createBaseConfiguration(
               sourceType: "unambiguous",
               plugins: [
                 mode === "development" &&
-                require.resolve("react-refresh/babel"),
+                  require.resolve("react-refresh/babel"),
                 require.resolve("@babel/plugin-proposal-class-properties"),
                 require.resolve("@babel/plugin-transform-runtime"),
                 require.resolve(
                   "../../shared/babel-plugins/environment-usage-plugin"
                 ),
-                mode === "test" && "istanbul"
+                mode === "test" && "istanbul",
               ].filter(Boolean),
             },
           },
@@ -224,24 +226,47 @@ export function createBaseConfiguration(
           test: /\.svg$/i,
           use: [
             {
+              loader: "babel-loader",
+              options: {
+                // Allow customization from babelrc from the application folder
+                babelrcRoots: [baseApplicaationDirectory],
+                presets: [
+                  ["@babel/preset-env", { targets: "defaults" }],
+                  [
+                    "@babel/preset-react",
+                    {
+                      runtime: "automatic",
+                    },
+                  ],
+                  ["@babel/preset-typescript"],
+                ],
+                sourceType: "unambiguous",
+              },
+            },
+            require.resolve(
+              "../../shared/loaders/ImageResolutionOptimizer/namedSVG"
+            ),
+            {
               loader: require.resolve("@svgr/webpack"),
               options: {
                 exportType: "named",
+                babel: false,
               },
             },
-            {
-              loader: require.resolve("file-loader"),
-            },
+            require.resolve(
+              "../../shared/loaders/ImageResolutionOptimizer/extractImages"
+            ),
           ],
           issuer: {
             and: [/\.(ts|tsx|js|jsx|md|mdx)$/],
           },
         },
         {
-          test: /\.(png|jpe?g|gif|pdf|ttf|otf|mp4)$/i,
-          loader: "file-loader",
+          test: /\.(png|jpe?g)$/i,
+          loader: require.resolve(
+            "../../shared/loaders/ImageResolutionOptimizer/default"
+          ),
           options: {
-            name: "[path][name].[ext]",
             publicPath: (url: string) => {
               if (baseConfig.output?.publicPath)
                 return `${baseConfig.output?.publicPath || "/"}${url}`;
@@ -250,7 +275,7 @@ export function createBaseConfiguration(
           },
         },
         {
-          test: /\.(svg)$/i,
+          test: /\.(gif|pdf|ttf|otf|mp4)$/i,
           loader: "file-loader",
           options: {
             name: "[path][name].[ext]",
@@ -260,15 +285,14 @@ export function createBaseConfiguration(
               else return url;
             },
           },
-          issuer: {
-            and: [/\.(s?css)$/],
-          },
-        },
+        }
       ],
     },
     resolve: {
       plugins: [
-        setupTsConfigPathsPlugin(join(baseApplicaationDirectory, "tsconfig.json")),
+        setupTsConfigPathsPlugin(
+          join(baseApplicaationDirectory, "tsconfig.json")
+        ),
         LibraryVersionOptimizerPlugin,
       ].filter(Boolean) as any[],
       extensions: [".ts", ".tsx", ".js", ".json", ".wasm", ".jsx"],
@@ -288,7 +312,7 @@ export function createBaseConfiguration(
         https: require.resolve("https-browserify"),
         assert: require.resolve("assert/build/assert"),
         os: require.resolve("os-browserify/browser"),
-        path: require.resolve("path-browserify")
+        path: require.resolve("path-browserify"),
       },
     },
     entry: {},
@@ -300,14 +324,16 @@ export function createBaseConfiguration(
   };
 
   if (mode !== "test") {
-    const entry = (baseConfig.entry! as Webpack.EntryObject)
-    entry.container = require.resolve("systemjs-webpack-interop/auto-public-path")
+    const entry = baseConfig.entry! as Webpack.EntryObject;
+    entry.container = require.resolve(
+      "systemjs-webpack-interop/auto-public-path"
+    );
     entry.main = {
       import: [require.resolve("./scripts/init")],
       library: {
         type: "umd",
       },
-    }
+    };
   }
 
   return loadCustomizer(baseApplicaationDirectory)(baseConfig);
@@ -323,11 +349,18 @@ export function createWebpackConfiguration(
 function loadCustomizer(
   baseDir: string
 ): (config: Configuration) => Configuration {
-  const customizerPath = join(baseDir, "custom-config.js")
+  const customizerPath = join(baseDir, "custom-config.js");
   try {
     return require(customizerPath).webpack;
   } catch (e) {
-    console.log(`\n\nTo customize webpack config, create a module at ${chalk.white(`./${relative(process.env.INIT_CWD!, join(baseDir, "custom-config.js"))}`)}\n\n`)
+    console.log(
+      `\n\nTo customize webpack config, create a module at ${chalk.white(
+        `./${relative(
+          process.env.INIT_CWD!,
+          join(baseDir, "custom-config.js")
+        )}`
+      )}\n\n`
+    );
     return (c) => c;
   }
 }

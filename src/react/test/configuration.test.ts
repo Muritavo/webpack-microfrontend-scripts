@@ -579,16 +579,15 @@ describe("Base", () => {
       );
     });
 
-    it("Should decide for an existing module version if working with linked libraries", (done) => {
+    it.skip("Should decide for an existing module version if working with linked libraries", (done) => {
       // writeEntryPointWithDuplicatedDependencyBecauseOfLink();
       writeEntryPointWithDuplicatedDependencyRealCenario();
-      const result = execSync('yarn link @onepercentio/one-ui', {
+      execSync('yarn link @onepercentio/one-ui', {
         stdio: "inherit",
         cwd: testDirectory.name
       })
       createWebpackConfiguration(testDirectory.name, "production").run(
         asyncWrapper(done, (_, stats) => {
-          console.warn(stats?.hasErrors(), stats?.compilation.errors[0])
           const modules = stats!
             .toJson()
             .modules!.filter((m) => m.name?.includes("react-router-dom"));
