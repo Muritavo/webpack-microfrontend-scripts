@@ -285,22 +285,7 @@ export function createBaseConfiguration(
               else return url;
             },
           },
-        },
-        // {
-        //   test: /\.(svg)$/i,
-        //   loader: "file-loader",
-        //   options: {
-        //     name: "[path][name].[ext]",
-        //     publicPath: (url: string) => {
-        //       if (baseConfig.output?.publicPath)
-        //         return `${baseConfig.output?.publicPath || "/"}${url}`;
-        //       else return url;
-        //     },
-        //   },
-        //   issuer: {
-        //     and: [/\.(s?css)$/],
-        //   },
-        // },
+        }
       ],
     },
     resolve: {
