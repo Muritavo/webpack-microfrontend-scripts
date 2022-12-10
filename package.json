@@ -13,7 +13,9 @@
   },
   "files": [
     "bin",
-    "index.d.ts"
+    "index.d.ts",
+    "augmentation",
+    "types"
   ],
   "repository": {
     "type": "git",
