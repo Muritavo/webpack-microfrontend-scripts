@@ -253,17 +253,6 @@ export function createBaseConfiguration(
                 babel: false,
               },
             },
-            {
-              loader: require.resolve("file-loader"),
-              options: {
-                name: "[path][name].[ext]",
-                publicPath: (url: string) => {
-                  if (baseConfig.output?.publicPath)
-                    return `${baseConfig.output?.publicPath || "/"}${url}`;
-                  else return url;
-                },
-              },
-            },
             require.resolve(
               "../../shared/loaders/ImageResolutionOptimizer/extractImages"
             ),

@@ -94,7 +94,7 @@ it("Should be able to create multiple versions of an image", (done) => {
 });
 
 it.only("Should create a component with scaling prop", (done) => {
-  writeEntryWithComp(`import pathBasedSVG, { ReactComponent } from './assets/example_svg.svg';
+  writeEntryWithComp(`import pathBasedSVG, { ReactComponent, Scaled } from './assets/example_svg.svg';
 import {useState} from "react";
   
   export function Component() { 
@@ -115,6 +115,8 @@ import {useState} from "react";
     </div>
     <h2>Result</h2>
     <ReactComponent scale={scale}/>
+    <h2>Path based</h2>
+    <img src={Scaled[scale]} width="500"/>
   </>
   }`);
 

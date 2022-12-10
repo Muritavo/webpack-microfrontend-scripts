@@ -81,5 +81,8 @@ There are three main loaders:
 #### For SVG resources (both loaders should be used together as of now)
 
 - src/shared/loaders/ImageResolutionOptimizer/extractImages.ts: Used over an SVG and extracts all inline image tag resources set at xlink:href to their specific files.
+It also defines 2 exports.
+- default: With the original SVG
+- Scaled: With the map of scaled svgs
 
 - src/shared/loaders/ImageResolutionOptimizer/namedSVG.ts: Modifies the inline ReactComponent from @svgr/webpack and injects the extracted images to be controled by a prop called props.scale (0.5x, 1x, 2x, 3x, 4x)

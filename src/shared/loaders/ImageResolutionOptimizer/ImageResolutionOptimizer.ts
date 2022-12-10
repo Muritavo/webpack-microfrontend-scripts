@@ -31,6 +31,7 @@ async function emitFile(
   suffix: string,
   customName: CustomNameFactory = (suffix) => `[path][name]${suffix}.[ext]`
 ) {
+  const options = getOptions(this as any) as any;
   const url = interpolateName(this as any, customName(suffix), {
     context: this.rootContext,
     content,
@@ -39,8 +40,12 @@ async function emitFile(
     immutable: true,
     sourceFilename: path.relative(this.rootContext, this.resourcePath),
   });
-
-  return url;
+  let publicPath = `__webpack_public_path__ + ${JSON.stringify(url)}`;
+  if (options.publicPath) {
+    publicPath = options.publicPath(url);
+    publicPath = JSON.stringify(publicPath);
+  }
+  return publicPath;
 }
 
 async function resize(
@@ -52,16 +57,9 @@ async function resize(
   suffix: string,
   customName: CustomNameFactory = (suffix) => `[path][name]${suffix}.[ext]`
 ) {
-  const options = getOptions(this as any) as any;
   if (suffix) suffix = "_" + suffix;
   const content = await baseImage.resize(width).toBuffer();
-  const url = emitFile.call(this, content, suffix, customName);
-  let publicPath = `__webpack_public_path__ + ${JSON.stringify(url)}`;
-  if (options.publicPath) {
-    publicPath = options.publicPath(url);
-    publicPath = JSON.stringify(publicPath);
-  }
-  return publicPath;
+  return emitFile.call(this, content, suffix, customName);
 }
 
 async function createVariations(
@@ -221,9 +219,15 @@ export async function extractImageResources(
       }
     }
   }
-  
-  await emitFile.call(this, parsedXml.documentElement.outerHTML, "");
 
+  const originalURL = await emitFile.call(
+    this,
+    parsedXml.documentElement.outerHTML,
+    ""
+  );
+  const otherResolutions: Partial<{
+    [k in ImageScales]: string;
+  }> = {};
   for (let res of Object.values(ImageScales)) {
     const resInfo = BASE_SIZES.find(([_, enumVal]) => enumVal === res)!;
     for (let image of images) {
@@ -240,12 +244,21 @@ export async function extractImageResources(
         ).toString("base64")}`
       );
     }
-    await emitFile.call(
+    otherResolutions[res] = await emitFile.call(
       this,
       parsedXml.documentElement.outerHTML,
       "_" + resInfo[1]
     );
   }
 
-  return parsedXml.documentElement.outerHTML;
+  const exportClause = `export default ${originalURL};
+export const Scaled = {
+    "0.5x": ${otherResolutions["0.5x"]},
+    "1x": ${otherResolutions["1x"]},
+    "2x": ${otherResolutions["2x"]},
+    "3x": ${otherResolutions["3x"]},
+    "4x": ${otherResolutions["4x"]}
+}`;
+
+  return exportClause;
 }
