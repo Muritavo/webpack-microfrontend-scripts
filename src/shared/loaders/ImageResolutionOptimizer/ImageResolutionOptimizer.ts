@@ -55,7 +55,7 @@ async function resize(
   baseImage: ReturnType<typeof Sharp>,
   width: number,
   suffix: string,
-  customName: CustomNameFactory = (suffix) => `[path][name]${suffix}.[ext]`
+  customName: CustomNameFactory = (suffix) => `[path][name]${suffix}.webp`
 ) {
   if (suffix) suffix = "_" + suffix;
   const content = await baseImage.resize(width).toBuffer();
@@ -105,7 +105,7 @@ export async function urlBasedImageResolutionOptimizer(
 ) {
   const request = new URLSearchParams(this.resourceQuery);
   try {
-    let baseImage = Sharp(this.resourcePath);
+    let baseImage = Sharp(this.resourcePath).webp();
     if (request.get("w")) {
       baseImage = Sharp(
         await baseImage.resize(Number(request.get("w"))).toBuffer()
@@ -201,8 +201,8 @@ export async function extractImageResources(
         const sections = ["", extension, b64];
         const [_original, ext, src] = sections;
         try {
-          const imageSharp = Sharp(Buffer.from(src, "base64"));
-          baseImages.push([imageSharp, extension]);
+          const imageSharp = Sharp(Buffer.from(src, "base64")).webp();
+          baseImages.push([imageSharp, 'webp']);
           const resources = await createVariations.call(
             this,
             imageSharp,
