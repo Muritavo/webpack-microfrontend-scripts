@@ -206,7 +206,7 @@ export async function extractImageResources(
           const resources = await createVariations.call(
             this,
             imageSharp,
-            (suffix) => `[path][name]/${images.indexOf(image)}${suffix}.${ext}`
+            (suffix) => `[path][name]/${images.indexOf(image)}${suffix}.${'webp'}`
           );
           imageResources.push({
             ...resources,
