@@ -40,7 +40,7 @@ export function createIndexHTML() {
 export function createCompilerErrorHandler(
   doneCb: jest.DoneCallback | ((errors?: any) => void)
 ) {
-  return (_error?: Error, r?: Stats) => {
+  return (_error?: null | Error, r?: Stats): any => {
     if (_error) doneCb(_error);
     if (r && r.hasErrors())
       doneCb(

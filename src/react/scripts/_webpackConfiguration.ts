@@ -251,6 +251,7 @@ export function createBaseConfiguration(
               options: {
                 exportType: "named",
                 babel: false,
+                ref: true
               },
             },
             require.resolve(

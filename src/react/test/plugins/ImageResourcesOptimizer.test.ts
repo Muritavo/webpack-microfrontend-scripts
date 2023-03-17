@@ -28,6 +28,10 @@ function writeEntryWithComp(compSrc: string) {
     join(__dirname, "..", "fixtures", "image", "svg", "example.svg"),
     join(testDirectory.name, "src", "assets", "example_svg.svg")
   );
+  copyFileSync(
+    join(__dirname, "..", "fixtures", "image", "svg", "minimal.svg"),
+    join(testDirectory.name, "src", "assets", "simple.svg")
+  );
   writeFileSync(join(testDirectory.name, "src", "component.tsx"), compSrc);
   writeFileSync(
     join(testDirectory.name, "src", "index.ts"),
@@ -93,7 +97,7 @@ it("Should be able to create multiple versions of an image", (done) => {
   );
 });
 
-it.only("Should create a component with scaling prop", (done) => {
+it("Should create a component with scaling prop", (done) => {
   writeEntryWithComp(`import pathBasedSVG, { ReactComponent, Scaled } from './assets/example_svg.svg';
 import {useState} from "react";
   
@@ -216,4 +220,56 @@ import {useState} from "react";
   );
 });
 
-describe("BUGFIX", () => {});
+describe("BUGFIX", () => {
+  it.only("Should be able to use ref with svg", (done) => {
+    writeEntryWithComp(`import {ReactComponent} from './assets/simple.svg';
+import {useRef, useEffect} from 'react';
+  
+export function Component() { 
+  const ref = useRef()
+  useEffect(() => {
+    setInterval(() => {
+      console.log(ref)
+    }, 1000)
+  }, [])
+  return <>
+    <style dangerouslySetInnerHTML={{__html: "img { width: 90vw }"}}/>
+    <h1>SVG</h1>
+    <h2>Without images</h2>
+    <ReactComponent ref={ref}/>
+  </>
+  }`);
+    createWebpackConfiguration(testDirectory.name, "production").run(
+      createCompilerErrorHandler((error: Error) => {
+        if (error) return done(error);
+        done();
+      })
+    );
+  });
+  it("Should be able to use an svg without images", (done) => {
+    writeEntryWithComp(`import svgPath from './assets/simple.svg';
+  
+  export function Component() { 
+  return <>
+    <style dangerouslySetInnerHTML={{__html: "img { width: 90vw }"}}/>
+    <h1>SVG</h1>
+    <h2>Without images</h2>
+    <img src={svgPath}/>
+  </>
+  }`);
+    createWebpackConfiguration(testDirectory.name, "production").run(
+      createCompilerErrorHandler(((error: Error) => {
+        if (error) return done(error);
+        try {
+          const imageResources = readdirSync(
+            join(testDirectory.name, "build", "src", "assets")
+          );
+          expect(imageResources).toHaveLength(1);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      }) as any)
+    );
+  });
+});
