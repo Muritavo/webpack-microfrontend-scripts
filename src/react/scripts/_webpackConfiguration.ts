@@ -15,6 +15,7 @@ import MiniCssExtractPlugin, {
 } from "mini-css-extract-plugin";
 import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
 import chalk from "chalk";
+import { browserifyReplacements } from "./consts";
 
 type ConfirationModes = Configuration["mode"] | "test";
 
@@ -129,7 +130,9 @@ export function createBaseConfiguration(
   plugins.push(
     {
       apply(c) {
-        c.hooks.afterCompile.tap("Logger", (comp) => {});
+        c.hooks.afterCompile.tap("Logger", (comp) => {
+          console.log(`Server is running at http://localhost:${0}`)
+        });
       },
     },
     new DefinePlugin({
@@ -302,19 +305,7 @@ export function createBaseConfiguration(
         "node_modules",
         join(baseApplicaationDirectory, "node_modules"),
       ],
-      fallback: {
-        fs: false,
-        zlib: require.resolve("browserify-zlib"),
-        stream: require.resolve("stream-browserify"),
-        buffer: require.resolve("buffer"),
-        crypto: require.resolve("crypto-browserify"),
-        http: require.resolve("stream-http"),
-        url: require.resolve("url/url"),
-        https: require.resolve("https-browserify"),
-        assert: require.resolve("assert/build/assert"),
-        os: require.resolve("os-browserify/browser"),
-        path: require.resolve("path-browserify"),
-      },
+      fallback: browserifyReplacements,
     },
     entry: {},
     plugins,

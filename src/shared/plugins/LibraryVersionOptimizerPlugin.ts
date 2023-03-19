@@ -1,4 +1,6 @@
 import { Plugin, ResolveRequest } from "enhanced-resolve";
+import { lstatSync } from "fs";
+import { browserifyReplacements } from "../../react/scripts/consts";
 
 const versionMap: {
   [LIB: string]: {
@@ -26,8 +28,11 @@ const LibraryVersionOptimizerPlugin: Plugin = {
       async (req, res, cb) => {
         if (
           /^[a-z].*[a-z]$/.test(req.request || "") &&
-          !req.request?.endsWith(".js") &&
-          !req.request?.includes("package.json")
+          ![".js", ".svg", ".png", ".css"].some((end) =>
+            req.request?.endsWith(end)
+          ) &&
+          !req.request?.includes("package.json") &&
+          !Object.keys(browserifyReplacements).includes(req.request!)
         ) {
           const resolved = await new Promise<ResolveRequest>(
             (resolve, reject) => {
@@ -51,8 +56,7 @@ const LibraryVersionOptimizerPlugin: Plugin = {
               version: string;
             };
 
-            if (req.request?.includes("react-router-dom"))
-            if (!versionMap[req.request!])
+            if (!versionMap[req.request!]) {
               versionMap[req.request!] = {
                 versions: [
                   {
@@ -61,7 +65,12 @@ const LibraryVersionOptimizerPlugin: Plugin = {
                   },
                 ],
               };
-            const preloadedLib = versionMap[req.request!].versions.find(a => (getMajor(a.version) === getMajor(data.version)));
+            }
+            if (!versionMap[req.request!])
+              console.log(req.request, versionMap[req.request!]);
+            const preloadedLib = versionMap[req.request!].versions.find(
+              (a) => getMajor(a.version) === getMajor(data.version)
+            );
             if (preloadedLib) {
               req.path = preloadedLib.baseContext;
             } else {

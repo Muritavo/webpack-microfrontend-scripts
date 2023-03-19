@@ -5,6 +5,7 @@ import { join, resolve } from "path";
 import { getArgument } from "../../shared/arguments";
 //This plugin is used to inject the bundles into the main html (when it exists)
 import { createWebpackConfiguration } from "./_webpackConfiguration";
+import { serverPort } from "./consts";
 
 const root = resolve(getArgument("root", process.cwd()));
 const mode = "development";
@@ -22,7 +23,7 @@ const devServer = new DevServer(
     headers: {
       "Access-Control-Allow-Origin": "*",
     },
-    port: Number(process.env.PORT || "3500"),
+    port: serverPort,
   },
   createWebpackConfiguration(root, mode) as any
 );
