@@ -15,7 +15,7 @@ import MiniCssExtractPlugin, {
 } from "mini-css-extract-plugin";
 import LibraryVersionOptimizerPlugin from "../../shared/plugins/LibraryVersionOptimizerPlugin";
 import chalk from "chalk";
-import { browserifyReplacements } from "./consts";
+import { browserifyReplacements, serverPort } from "./consts";
 
 type ConfirationModes = Configuration["mode"] | "test";
 
@@ -130,8 +130,12 @@ export function createBaseConfiguration(
   plugins.push(
     {
       apply(c) {
-        c.hooks.afterCompile.tap("Logger", (comp) => {
-          console.log(`Server is running at http://localhost:${0}`)
+        let warnAboutPort = false;
+        c.hooks.afterCompile.tap("Logger", () => {
+          if (!warnAboutPort) {
+            console.log(`Server is running at http://localhost:${serverPort}`);
+            warnAboutPort = true;
+          }
         });
       },
     },
@@ -254,7 +258,7 @@ export function createBaseConfiguration(
               options: {
                 exportType: "named",
                 babel: false,
-                ref: true
+                ref: true,
               },
             },
             require.resolve(
@@ -289,7 +293,7 @@ export function createBaseConfiguration(
               else return url;
             },
           },
-        }
+        },
       ],
     },
     resolve: {
