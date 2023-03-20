@@ -5,7 +5,7 @@ import { resolve } from "path";
 import { getArgument } from "../../shared/arguments";
 import { createWebpackConfiguration } from "./_webpackConfiguration";
 
-const root = resolve(getArgument("root", process.env.INIT_CWD!));
+const root = resolve(getArgument("root", process.cwd()!));
 const mode = "production";
 process.env.NODE_ENV = mode;
 
