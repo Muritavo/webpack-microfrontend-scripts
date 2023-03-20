@@ -132,7 +132,7 @@ export function createBaseConfiguration(
       apply(c) {
         let warnAboutPort = false;
         c.hooks.afterCompile.tap("Logger", () => {
-          if (!warnAboutPort) {
+          if (process.env.NODE_ENV === "development" && !warnAboutPort) {
             console.log(`Server is running at http://localhost:${serverPort}`);
             warnAboutPort = true;
           }
