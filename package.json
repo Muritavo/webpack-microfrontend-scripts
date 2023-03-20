@@ -1,6 +1,6 @@
 {
   "name": "@muritavo/webpack-microfrontend-scripts",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "A series of webpack build and watch script with microfrontends in mind",
   "main": "index.js",
   "author": "Murilo Oliveira de Araujo",
@@ -30,7 +30,7 @@
     "start:react-mfe": "export PORT=19000 && node bin/react/scripts/start.js --root=./src/react/test/microfrontend",
     "prebuild:react": "tsc",
     "build:react": "node bin/react/scripts/build.js --root=./src/react/test/application",
-    "prepublish": "tsc"
+    "prepack": "tsc"
   },
   "dependencies": {
     "@babel/core": "^7.14.5",
