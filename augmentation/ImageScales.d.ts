@@ -1,5 +1,5 @@
 declare module "*.png" {
   export const Scaled: {
-    [s in import("../types/ImageScales").ImageScales]: string;
+    [s in import("../bin/types/ImageScales").ImageScales]: string;
   };
 }
