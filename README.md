@@ -86,3 +86,7 @@ It also defines 2 exports.
 - Scaled: With the map of scaled svgs
 
 - src/shared/loaders/ImageResolutionOptimizer/namedSVG.ts: Modifies the inline ReactComponent from @svgr/webpack and injects the extracted images to be controled by a prop called props.scale (0.5x, 1x, 2x, 3x, 4x)
+
+### environment-usage-plugin
+
+Babel plugin that checks for undefined env variables referenced on code and prevents compilation until those variables are defined
