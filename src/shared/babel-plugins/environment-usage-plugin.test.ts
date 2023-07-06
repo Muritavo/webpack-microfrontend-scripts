@@ -17,5 +17,12 @@ pluginTester({
       code: "console.log(process.env.UNDEFINED_VARIABLE)",
       error: / UNDEFINED_VARIABLE /,
     },
+    "Should allow compilation if the variable is indicated in the whitelist": {
+      code: "console.log(process.env.WHITELISTED_VARIABLE)",
+      output: "console.log(undefined);",
+      pluginOptions: {
+        whitelist: ['WHITELISTED_VARIABLE']
+      }
+    },
   },
 });
