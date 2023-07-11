@@ -28,8 +28,6 @@ function EnvironmentUsageBabelPlugin({ types: t }: { types: typeof types }) {
                 throw new Error(
                   `The environment variable ${key.value} is not defined at the ENV. Please, define it and restart the application`
                 );
-              } else {
-                path.replaceWith(t.valueToNode(value));
               }
             }
           }
