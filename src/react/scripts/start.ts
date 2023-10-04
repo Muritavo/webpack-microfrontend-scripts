@@ -24,6 +24,7 @@ const devServer = new DevServer(
       "Access-Control-Allow-Origin": "*",
     },
     port: serverPort,
+    https: process.env.HTTPS === "true"
   },
   createWebpackConfiguration(root, mode) as any
 );
