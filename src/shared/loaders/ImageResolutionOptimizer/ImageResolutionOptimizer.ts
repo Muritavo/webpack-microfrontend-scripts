@@ -23,6 +23,14 @@ const BASE_SIZES = [
 
 type CustomNameFactory = (suffix: string) => string;
 
+function loaderOptions(this: any) {
+  const options = getOptions(this) as { convertTo?: "png" };
+
+  return {
+    convertTo: options.convertTo === undefined ? "webp" : options.convertTo,
+  } as const;
+}
+
 async function emitFile(
   this: LoaderContext<{
     publicPath: (url: string) => string;
@@ -55,8 +63,11 @@ async function resize(
   baseImage: ReturnType<typeof Sharp>,
   width: number,
   suffix: string,
-  customName: CustomNameFactory = (suffix) => `[path][name]${suffix}.webp`
+  customName?: CustomNameFactory
 ) {
+  const { convertTo } = loaderOptions.bind(this)();
+  if (customName === undefined)
+    customName = (suffix) => `[path][name]${suffix}.${convertTo}`;
   if (suffix) suffix = "_" + suffix;
   const content = await baseImage.resize(width).toBuffer();
   return emitFile.call(this, content, suffix, customName);
@@ -103,9 +114,10 @@ export async function urlBasedImageResolutionOptimizer(
     publicPath: (url: string) => string;
   }>
 ) {
+  const { convertTo } = loaderOptions.bind(this)();
   const request = new URLSearchParams(this.resourceQuery);
   try {
-    let baseImage = Sharp(this.resourcePath).webp();
+    let baseImage = Sharp(this.resourcePath)[convertTo]();
     if (request.get("w")) {
       baseImage = Sharp(
         await baseImage.resize(Number(request.get("w"))).toBuffer()
@@ -182,6 +194,7 @@ export async function extractImageResources(
   }>,
   r: string
 ) {
+  const { convertTo } = loaderOptions.bind(this)();
   const imageResources: typeof imageMap[string] = (imageMap[this.resourcePath] =
     []);
   const instance = new JSDOM();
@@ -201,12 +214,13 @@ export async function extractImageResources(
         const sections = ["", extension, b64];
         const [_original, ext, src] = sections;
         try {
-          const imageSharp = Sharp(Buffer.from(src, "base64")).webp();
-          baseImages.push([imageSharp, 'webp']);
+          const imageSharp = Sharp(Buffer.from(src, "base64"))[convertTo]();
+          baseImages.push([imageSharp, convertTo]);
           const resources = await createVariations.call(
             this,
             imageSharp,
-            (suffix) => `[path][name]/${images.indexOf(image)}${suffix}.${'webp'}`
+            (suffix) =>
+              `[path][name]/${images.indexOf(image)}${suffix}.${convertTo}`
           );
           imageResources.push({
             ...resources,
